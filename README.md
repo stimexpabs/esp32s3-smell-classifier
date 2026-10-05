@@ -4,6 +4,11 @@ A step-by-step tutorial that takes one analog gas sensor, an MQ-135, from raw vo
 on the ESP32-S3 itself. The finished demo tells clean air, breath, alcohol vapour and smoke apart from the shape
 of the sensor's response over ten seconds, and announces the result on a buzzer.
 
+![The ESP32-S3 board with the MQ-135 sensor module connected by a four-wire cable](docs/images/hardware.jpg)
+
+*The hardware used to write the tutorial: a custom ESP32-S3-WROOM-1 N16R8 board with an on-board buzzer, and an
+MQ-135 module on a four-wire cable. Any ESP32-S3 board wired as in [chapter 1](docs/01-hardware.md) works.*
+
 ```
 MQ-135 → ADC (10 Hz) → 10 s window → ln(v / start) → 1-D CNN, int8 → vote over 5 s → 1, 2 or 3 beeps
 ```

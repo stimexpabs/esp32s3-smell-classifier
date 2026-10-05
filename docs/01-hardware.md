@@ -1,5 +1,10 @@
 # 1. Hardware
 
+![The ESP32-S3 board with the MQ-135 sensor module connected by a four-wire cable](images/hardware.jpg)
+
+*The setup used for this tutorial. The board is a custom one with the divider resistors and a buzzer on it; the
+wiring below reproduces the same circuit on any ESP32-S3 board.*
+
 ## What you need
 
 - An **ESP32-S3 board with its native USB port** available. The tutorial was written on an ESP32-S3-WROOM-1
