@@ -1,0 +1,481 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>MQ-135 Collection Guide</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column, a bench worksheet. A sticky tally strip stays in view; each step is a plain section, and only the things you operate (calculator, timer, round rows) get a surface. */
+:root {
+  --bg: #EDF0EE; --surface: #F8FAF9; --ink: #14201D; --muted: #55645F; --line: #C9D2CE;
+  --accent: #0B6B63; --accent-ink: #FFFFFF; --code-bg: #E1E7E4;
+  --c-clean: #56677A; --c-breath: #19788B; --c-alcohol: #5646B0; --c-smoke: #A85C12;
+  --ok: #24764A; --warn: #946000; --bad: #B03328;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101615; --surface: #18201E; --ink: #E6ECE9; --muted: #9AA8A3; --line: #2E3A37;
+    --accent: #4FC4B8; --accent-ink: #06211E; --code-bg: #212C29;
+    --c-clean: #9FB0BF; --c-breath: #5CC0D3; --c-alcohol: #A99BF0; --c-smoke: #E3A057;
+    --ok: #6CC792; --warn: #E0B04A; --bad: #F0857A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101615; --surface: #18201E; --ink: #E6ECE9; --muted: #9AA8A3; --line: #2E3A37;
+  --accent: #4FC4B8; --accent-ink: #06211E; --code-bg: #212C29;
+  --c-clean: #9FB0BF; --c-breath: #5CC0D3; --c-alcohol: #A99BF0; --c-smoke: #E3A057;
+  --ok: #6CC792; --warn: #E0B04A; --bad: #F0857A;
+  color-scheme: dark;
+}
+
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55; }
+.wrap { max-width: 860px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 72px; display: flex; flex-direction: column; gap: 44px; }
+h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: 2.3rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.55rem; }
+h3 { font-size: 1.1rem; }
+p { margin: 0; max-width: 66ch; }
+a { color: var(--accent); }
+.lede { color: var(--muted); font-size: 1.05rem; }
+.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 16px; }
+.step-head { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); padding-top: 20px; }
+ul.plain { margin: 0; padding-left: 1.15em; display: flex; flex-direction: column; gap: 6px; max-width: 66ch; }
+code, .mono { font-family: var(--mono); font-size: 0.88em; }
+:not(pre) > code { background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 3px; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* sticky tally */
+.tally { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.tally-in { max-width: 860px; margin: 0 auto; padding-inline: 20px; padding-block: 10px; display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; font-size: 0.86rem; }
+.tally-session { font-family: var(--mono); font-weight: 500; }
+.tally-item { display: inline-flex; gap: 6px; align-items: baseline; white-space: nowrap; }
+.dot { width: 0.6em; height: 0.6em; display: inline-block; flex: none; background: var(--muted); }
+.dot.clean { background: var(--c-clean); } .dot.breath { background: var(--c-breath); }
+.dot.alcohol { background: var(--c-alcohol); } .dot.smoke { background: var(--c-smoke); }
+
+/* commands */
+.cmd { display: flex; align-items: stretch; gap: 0; background: var(--code-bg); border-radius: 4px; min-width: 0; }
+.cmd pre { margin: 0; padding: 9px 12px; overflow-x: auto; flex: 1; min-width: 0; font-family: var(--mono); font-size: 0.84rem; line-height: 1.45; white-space: pre; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.copy { flex: none; border: 0; border-left: 1px solid var(--line); background: transparent; padding: 0 12px; font-size: 0.8rem; color: var(--accent); font-weight: 500; border-radius: 0 4px 4px 0; }
+.copy:hover { background: var(--line); }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); padding: 7px 14px; border-radius: 4px; font-weight: 500; font-size: 0.92rem; }
+.btn.quiet { background: transparent; color: var(--accent); }
+.btn.danger { border-color: var(--bad); background: transparent; color: var(--bad); }
+
+/* operated surfaces */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.fields { display: flex; flex-wrap: wrap; gap: 14px 20px; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label { font-size: 0.8rem; color: var(--muted); }
+input[type="text"], input[type="number"] { font-family: var(--mono); font-size: 0.95rem; padding: 7px 9px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); width: 11rem; max-width: 100%; }
+.check { display: flex; gap: 10px; align-items: flex-start; }
+.check input { margin-top: 0.3em; width: 1.05em; height: 1.05em; accent-color: var(--accent); flex: none; }
+.checks { display: flex; flex-direction: column; gap: 8px; }
+
+/* classes */
+.classes { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0 28px; }
+.class { border-top: 2px solid var(--line); padding-block: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+.class.clean { border-color: var(--c-clean); } .class.breath { border-color: var(--c-breath); }
+.class.alcohol { border-color: var(--c-alcohol); } .class.smoke { border-color: var(--c-smoke); }
+.class p { font-size: 0.93rem; }
+.class .what { color: var(--muted); }
+.lbl { font-family: var(--mono); font-weight: 500; font-size: 0.9rem; display: inline-flex; gap: 7px; align-items: baseline; }
+.note { border-left: 3px solid var(--warn); padding: 2px 0 2px 14px; font-size: 0.95rem; }
+
+/* timer */
+.timer { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: center; }
+.clock { font-family: var(--mono); font-size: 2rem; font-weight: 500; font-variant-numeric: tabular-nums; min-width: 5.2ch; }
+.status { font-size: 0.92rem; }
+.status.ok { color: var(--ok); } .status.warn { color: var(--warn); } .status.bad { color: var(--bad); }
+
+/* range bar */
+.range { position: relative; height: 74px; margin-inline: 6px; }
+.range .track { position: absolute; left: 0; right: 0; top: 30px; height: 12px; background: var(--code-bg); border: 1px solid var(--line); }
+.range .clipzone { position: absolute; top: 30px; height: 12px; right: 0; background: var(--bad); opacity: 0.35; }
+.range .span { position: absolute; top: 30px; height: 12px; background: var(--accent); opacity: 0.45; }
+.range .mark { position: absolute; top: 24px; width: 2px; height: 24px; background: var(--ink); }
+.range .tag { position: absolute; font-family: var(--mono); font-size: 0.72rem; white-space: nowrap; transform: translateX(-50%); color: var(--ink); }
+.range .tag.up { top: 4px; } .range .tag.down { top: 52px; }
+.range .tag.edge-l { transform: none; } .range .tag.edge-r { transform: translateX(-100%); }
+.range .tag.dim { color: var(--muted); }
+
+/* timeline */
+.tl { display: flex; flex-direction: column; gap: 6px; }
+.tl-row { display: flex; gap: 2px; }
+.tl-seg { padding: 8px 8px; font-size: 0.8rem; min-width: 0; overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+.tl-seg b { display: block; font-family: var(--mono); font-weight: 500; }
+.tl-seg span { color: var(--muted); }
+.tl-seg.expose { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.tl-seg.expose span { color: var(--accent-ink); }
+.tl-beeps { display: flex; font-family: var(--mono); font-size: 0.76rem; color: var(--muted); }
+
+/* rounds */
+.round { display: flex; flex-direction: column; gap: 0; }
+.round-head { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; padding-bottom: 8px; }
+.round-head .meta { color: var(--muted); font-size: 0.88rem; }
+.run { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; padding-block: 12px; border-top: 1px solid var(--line); align-items: start; }
+.run input { margin-top: 0.25em; width: 1.2em; height: 1.2em; accent-color: var(--accent); }
+.run-body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.run-top { display: flex; flex-wrap: wrap; gap: 2px 12px; align-items: baseline; }
+.run-how { font-size: 0.93rem; }
+.run.done .run-how, .run.done .lbl { color: var(--muted); }
+.run.done .cmd { opacity: 0.55; }
+
+/* tables */
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 0.8rem; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); padding-right: 16px; }
+tr.current td { font-weight: 600; }
+.linkbtn { border: 0; background: none; padding: 0; color: var(--accent); text-decoration: underline; font-family: var(--mono); font-size: 0.9rem; }
+.bar { height: 6px; background: var(--code-bg); min-width: 60px; }
+.bar i { display: block; height: 100%; background: var(--accent); }
+details { border-top: 1px solid var(--line); padding-block: 10px; }
+details summary { cursor: pointer; font-weight: 500; }
+details > div { padding-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+.small { font-size: 0.86rem; color: var(--muted); }
+@media (max-width: 520px) { h1 { font-size: 1.85rem; } .tl-seg { font-size: 0.72rem; padding: 6px 5px; } }
+</style>
+
+<div class="tally" aria-live="polite"><div class="tally-in" id="tally"></div></div>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:12px">
+  <span class="eyebrow">ESP32-S3 edge AI tutorial · chapter 4</span>
+  <h1>Collecting the MQ-135 dataset</h1>
+  <p class="lede">A worksheet for one recording session at the bench. Work down the page: prepare, check the signal range, record four rounds, verify. Then repeat on another day or in another room until every class has at least 24 events.</p>
+  <p class="small">Ticks and values on this page are saved in this browser only. The recordings on disk are the real record; <code>check_dataset.py</code> counts them.</p>
+</header>
+
+<section>
+  <div class="step-head"><span class="eyebrow">What you are recording</span><h2>Four classes</h2></div>
+  <p>The model learns to tell these apart from the shape of the sensor's response: how fast it rises, how high it goes and how slowly it falls.</p>
+  <div class="classes">
+    <div class="class clean"><span class="lbl"><i class="dot clean"></i>clean</span><p class="what">No gas.</p><p>Leave the sensor alone, or disturb the air without adding anything: a hand wave, a fanned card, moving the board.</p></div>
+    <div class="class breath"><span class="lbl"><i class="dot breath"></i>breath</span><p class="what">Exhaled air.</p><p>Breathe out slowly onto the mesh from about 5 cm. Recovers fastest, so it goes early in each round.</p></div>
+    <div class="class alcohol"><span class="lbl"><i class="dot alcohol"></i>alcohol</span><p class="what">Hand sanitizer or isopropyl alcohol.</p><p>A damp cotton swab held 2–5 cm from the mesh. Do not touch the sensor with it.</p></div>
+    <div class="class smoke"><span class="lbl"><i class="dot smoke"></i>smoke</span><p class="what">Incense, or a match just blown out.</p><p>Let the smoke drift across the mesh from 5–10 cm. Lingers longest, so it goes last in each round.</p></div>
+  </div>
+  <p class="note">Alcohol vapour is flammable. Close the bottle and move it away before lighting anything, and record smoke in a ventilated room.</p>
+</section>
+
+<section>
+  <div class="step-head"><span class="eyebrow">Step 1</span><h2>Name the session and prepare</h2></div>
+  <p>A session is one sitting: one place, one day, one warm-up. Whole sessions are later held back to test the model, so the name has to identify the sitting. Use a new name every time you sit down again.</p>
+  <div class="panel">
+    <div class="fields">
+      <div class="field"><label for="session">Session name</label><input type="text" id="session" spellcheck="false" autocomplete="off"></div>
+      <span class="small" style="max-width:38ch">Letters, digits and hyphens. Examples: <code>d1-desk</code>, <code>d2-kitchen</code>. Every command below uses this name.</span>
+    </div>
+    <div class="checks" id="prep"></div>
+  </div>
+  <h3>Warm-up</h3>
+  <p>The sensor needs at least 5 minutes powered before its reading settles. Start the timer when you plug the board in.</p>
+  <div class="panel">
+    <div class="timer">
+      <span class="clock" id="clock">5:00</span>
+      <button class="btn" id="warmStart" type="button">Start 5-minute timer</button>
+      <span class="status" id="warmStatus">Not started.</span>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="step-head"><span class="eyebrow">Step 2</span><h2>Check the signal range</h2></div>
+  <p>Run the live monitor, note the clean-air value, then apply your strongest stimulus (usually alcohol, held close) and note the highest <b>peak pin</b> value. Stop the monitor with Ctrl+C.</p>
+  <div class="cmd"><pre>.venv/bin/python tools/collect.py monitor</pre><button class="copy" type="button" data-copy=".venv/bin/python tools/collect.py monitor">Copy</button></div>
+  <div class="panel">
+    <div class="fields">
+      <div class="field"><label for="cleanMv">Clean-air pin voltage (mV)</label><input type="number" id="cleanMv" min="0" max="3100" step="0.1" inputmode="decimal"></div>
+      <div class="field"><label for="peakMv">Peak pin voltage with stimulus (mV)</label><input type="number" id="peakMv" min="0" max="3100" step="0.1" inputmode="decimal" placeholder="from the monitor"></div>
+    </div>
+    <div class="range" id="range" role="img" aria-label="Pin voltage range from 0 to 3100 millivolts"></div>
+    <p class="status" id="rangeVerdict"></p>
+  </div>
+  <p class="small">The ADC measures up to about 3100 mV at the pin. A response that reaches about 2900 mV flattens at the top, and flattened responses all look alike to a model.</p>
+</section>
+
+<section>
+  <div class="step-head"><span class="eyebrow">Step 3</span><h2>Record four rounds</h2></div>
+  <p>Each command records two events. A round is one command per class, so no class sits only at the start or the end of the sitting, where the sensor's drift is different. Copy a command, follow the beeps, then tick the row.</p>
+  <h3>What happens during one event</h3>
+  <div class="tl" aria-label="Phases of one recorded event">
+    <div class="tl-row">
+      <div class="tl-seg" style="flex:10"><b>baseline</b><span>10 s · keep clear</span></div>
+      <div class="tl-seg expose" style="flex:5"><b>expose</b><span>5 s</span></div>
+      <div class="tl-seg" style="flex:30"><b>recover</b><span>30 s or more · stimulus away, wait</span></div>
+    </div>
+    <div class="tl-beeps"><span style="flex:10;text-align:right">1 beep: apply ▸</span><span style="flex:5;text-align:right">2 beeps: remove ▸</span><span style="flex:30"></span></div>
+  </div>
+  <p>Recovery lasts until the reading is back within 10% of the baseline, up to 3 minutes, and then the second event starts by itself. <code>clean</code> runs the same length with no beeps.</p>
+  <div id="rounds" style="display:flex;flex-direction:column;gap:30px"></div>
+  <p class="note">Air the room after every smoke run. Smoke that lingers leaks into whatever you record next.</p>
+</section>
+
+<section>
+  <div class="step-head"><span class="eyebrow">Step 4</span><h2>Verify the session</h2></div>
+  <p>Count what is on disk and list the recordings worth redoing:</p>
+  <div class="cmd"><pre>.venv/bin/python tools/check_dataset.py</pre><button class="copy" type="button" data-copy=".venv/bin/python tools/check_dataset.py">Copy</button></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Flag</th><th>Meaning</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>no-response</code></td><td>The stimulus moved the reading by less than 15%.</td><td>Delete the file and record again, closer.</td></tr>
+      <tr><td><code>contaminated</code></td><td>A <code>clean</code> recording moved by more than 15%.</td><td>Delete it, air the room, record again.</td></tr>
+      <tr><td><code>clipped</code></td><td>The pin reached 2900 mV.</td><td>Delete it and record from further away.</td></tr>
+      <tr><td><code>no-recovery</code></td><td>The recording ended more than 10% above its baseline.</td><td>Keep it. Wait longer before the next event.</td></tr>
+    </tbody>
+  </table></div>
+  <p>Recordings are files named <code>data/raw/&lt;label&gt;/&lt;session&gt;_&lt;nn&gt;.csv</code>. To remove one, delete its file. Then look at the shapes:</p>
+  <div class="cmd"><pre>.venv/bin/python tools/plot.py</pre><button class="copy" type="button" data-copy=".venv/bin/python tools/plot.py">Copy</button></div>
+  <ul class="plain">
+    <li>Each panel is one class, with every event overlaid and time zero at the first beep.</li>
+    <li><code>clean</code> should stay near 1.0. The other classes should rise after time zero.</li>
+    <li>If two classes look the same to you, the model will struggle with that pair. Rethink that pair before recording more.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="step-head"><span class="eyebrow">Step 5</span><h2>Repeat across sessions</h2></div>
+  <p>Three sessions give 24 events per class, enough to train a first model. Five give 40. Use a different day or room each time, and a new session name.</p>
+  <div class="scroll"><table id="sessions"></table></div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center" id="resetRow"></div>
+</section>
+
+<section>
+  <div class="step-head"><span class="eyebrow">If something goes wrong</span><h2>Troubleshooting</h2></div>
+  <div>
+    <details><summary>The tool cannot open /dev/ttyACM0</summary><div><p>Only one program can hold the serial port. Close the ESP-IDF monitor in VS Code (Ctrl+]) or any other <code>collect.py</code> that is still running.</p></div></details>
+    <details><summary>"No data from /dev/ttyACM0"</summary><div><p>The board is not running the data-logger firmware, or it is still booting. Unplug and replug the USB cable and try again. If it persists, flash <code>firmware/data_logger</code> again.</p></div></details>
+    <details><summary>plot.py fails with "No module named matplotlib"</summary><div><p>That terminal has ESP-IDF activated, which switches <code>python3</code> to ESP-IDF's own environment. Open a new terminal without activating ESP-IDF and run the tool there.</p></div></details>
+    <details><summary>The reading never comes back to the baseline</summary><div><p>The room air still carries the gas. Open a window, move the stimulus further away and wait. The tool gives up after 3 minutes and warns you; let the monitor settle before the next run.</p></div></details>
+    <details><summary>I applied the stimulus at the wrong time</summary><div><p>Finish the run, then delete that event's file. The label would be wrong for the model, and a wrong label does more harm than a missing event.</p></div></details>
+    <details><summary>The clean-air value is different from yesterday</summary><div><p>That is normal. MQ sensors drift with temperature, humidity and age. The model works on each reading divided by its own baseline, and recording on several days teaches it the drift.</p></div></details>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var KEY = "mq135-collection-guide-v1";
+  var CLASSES = ["clean", "breath", "alcohol", "smoke"];
+  var PER_SESSION = 8, GOAL = 24, ADC_MAX = 3100, CLIP = 2900;
+
+  var ROUNDS = [
+    { title: "Standard", expose: 5, how: {
+      clean: "Do nothing. Keep hands and breath away from the sensor.",
+      breath: "Exhale slowly from about 5 cm for the whole 5 seconds.",
+      alcohol: "Freshly dampened swab, held 3 cm from the mesh.",
+      smoke: "Smoke drifting across the mesh from about 8 cm." } },
+    { title: "Short and far", expose: 3, how: {
+      clean: "During the 3 expose seconds, wave a hand back and forth over the sensor.",
+      breath: "A shorter breath from about 10 cm.",
+      alcohol: "Same swab, held 5 cm away.",
+      smoke: "From about 10 cm, letting only part of the plume reach the sensor." } },
+    { title: "Long", expose: 8, how: {
+      clean: "During the expose seconds, pick the board up, tilt it and put it back.",
+      breath: "One long, slow breath from about 5 cm.",
+      alcohol: "A nearly dry swab, held 2 cm away.",
+      smoke: "A thin wisp, from about 5 cm." } },
+    { title: "Mixed", expose: 5, how: {
+      clean: "Fan air across the sensor with a card or a small fan. Do not blow on it.",
+      breath: "Two short puffs from about 5 cm.",
+      alcohol: "A different product if you have one, at 4 cm.",
+      smoke: "The other source: a blown-out match if you used incense, or the reverse." } }
+  ];
+
+  var PREP = [
+    ["usb", "Board plugged in over USB and showing up as /dev/ttyACM0"],
+    ["monitor", "ESP-IDF monitor in VS Code is closed"],
+    ["term", "Terminal open at the project root, without ESP-IDF activated"],
+    ["alcohol", "Sanitizer or isopropyl alcohol, and cotton swabs"],
+    ["smoke", "Incense or matches, and a safe dish for them"],
+    ["air", "A window you can open, and a card or fan for the clean recordings"]
+  ];
+
+  var state = { session: "d1-desk", clean: "", peak: "", warmEnd: 0, sessions: {} };
+  try {
+    var saved = JSON.parse(localStorage.getItem(KEY) || "null");
+    if (saved && typeof saved === "object") { for (var k in saved) state[k] = saved[k]; }
+  } catch (e) {}
+  if (!state.sessions || typeof state.sessions !== "object") state.sessions = {};
+
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function $(id) { return document.getElementById(id); }
+  function cur() {
+    var s = state.sessions[state.session];
+    if (!s) { s = state.sessions[state.session] = { done: {}, prep: {} }; }
+    if (!s.done) s.done = {}; if (!s.prep) s.prep = {};
+    return s;
+  }
+  function count(name, cls) {
+    var s = state.sessions[name]; if (!s || !s.done) return 0;
+    var n = 0;
+    for (var r = 0; r < ROUNDS.length; r++) if (s.done[r + "-" + cls]) n += 2;
+    return n;
+  }
+  function total(cls) { var n = 0; for (var name in state.sessions) n += count(name, cls); return n; }
+  function command(cls, expose) {
+    return ".venv/bin/python tools/collect.py record --label " + cls + " --session " + state.session + " --events 2" + (expose !== 5 ? " --expose " + expose : "");
+  }
+
+  function renderTally() {
+    var h = '<span class="tally-session">' + esc(state.session) + "</span>";
+    CLASSES.forEach(function (c) {
+      h += '<span class="tally-item"><i class="dot ' + c + '"></i>' + c + ' <span class="mono num">' + count(state.session, c) + "/" + PER_SESSION + "</span></span>";
+    });
+    $("tally").innerHTML = h;
+  }
+
+  function renderPrep() {
+    var p = cur().prep, h = "";
+    PREP.forEach(function (item) {
+      h += '<label class="check"><input type="checkbox" id="prep-' + item[0] + '" data-prep="' + item[0] + '"' + (p[item[0]] ? " checked" : "") + "><span>" + esc(item[1]) + "</span></label>";
+    });
+    $("prep").innerHTML = h;
+  }
+
+  function renderRounds() {
+    var d = cur().done, h = "";
+    ROUNDS.forEach(function (round, r) {
+      h += '<div class="round"><div class="round-head"><h3>Round ' + (r + 1) + " · " + round.title + '</h3><span class="meta">stimulus held for ' + round.expose + " s</span></div>";
+      CLASSES.forEach(function (c) {
+        var id = r + "-" + c, cmd = command(c, round.expose);
+        h += '<div class="run' + (d[id] ? " done" : "") + '"><input type="checkbox" id="run-' + id + '" data-run="' + id + '"' + (d[id] ? " checked" : "") + ' aria-label="Round ' + (r + 1) + " " + c + ' recorded">' +
+          '<div class="run-body"><div class="run-top"><label class="lbl" for="run-' + id + '"><i class="dot ' + c + '"></i>' + c + '</label><span class="run-how">' + esc(round.how[c]) + "</span></div>" +
+          '<div class="cmd"><pre>' + esc(cmd) + '</pre><button class="copy" type="button" data-copy="' + esc(cmd) + '">Copy</button></div></div></div>';
+      });
+      h += "</div>";
+    });
+    $("rounds").innerHTML = h;
+  }
+
+  var confirmReset = false;
+  function renderSessions() {
+    var names = Object.keys(state.sessions);
+    if (names.indexOf(state.session) < 0) names.push(state.session);
+    var h = "<thead><tr><th>Session</th>";
+    CLASSES.forEach(function (c) { h += '<th class="n">' + c + "</th>"; });
+    h += "</tr></thead><tbody>";
+    names.forEach(function (name) {
+      h += '<tr class="' + (name === state.session ? "current" : "") + '"><td>' +
+        (name === state.session ? '<span class="mono">' + esc(name) + "</span> · open" : '<button class="linkbtn" type="button" data-open="' + esc(name) + '">' + esc(name) + "</button>") + "</td>";
+      CLASSES.forEach(function (c) { h += '<td class="n">' + count(name, c) + "</td>"; });
+      h += "</tr>";
+    });
+    h += '<tr><td>Total ticked · goal ' + GOAL + "</td>";
+    CLASSES.forEach(function (c) {
+      var t = total(c);
+      h += '<td class="n">' + t + '<div class="bar"><i style="width:' + Math.min(100, t / GOAL * 100) + '%"></i></div></td>';
+    });
+    h += "</tr></tbody>";
+    $("sessions").innerHTML = h;
+
+    $("resetRow").innerHTML = confirmReset
+      ? '<span>Clear all ticks for <code>' + esc(state.session) + '</code>? Files on disk are not touched.</span><button class="btn danger" type="button" data-reset="yes">Clear ticks</button><button class="btn quiet" type="button" data-reset="no">Keep them</button>'
+      : '<button class="btn quiet" type="button" data-reset="ask">Clear this session\'s ticks</button>';
+  }
+
+  function renderRange() {
+    var clean = parseFloat(state.clean), peak = parseFloat(state.peak);
+    var pct = function (v) { return Math.max(0, Math.min(100, v / ADC_MAX * 100)); };
+    var h = '<div class="track"></div><div class="clipzone" style="width:' + (100 - pct(CLIP)) + '%"></div>';
+    if (isFinite(clean) && isFinite(peak) && peak > clean) h += '<div class="span" style="left:' + pct(clean) + "%;width:" + (pct(peak) - pct(clean)) + '%"></div>';
+    h += '<span class="tag down dim edge-l" style="left:0">0 mV</span><span class="tag down dim edge-r" style="left:100%">clips from ' + CLIP + "</span>";
+    if (isFinite(clean)) h += '<div class="mark" style="left:' + pct(clean) + '%"></div><span class="tag up ' + (pct(clean) < 12 ? "edge-l" : "") + '" style="left:' + pct(clean) + '%">clean ' + clean + "</span>";
+    if (isFinite(peak)) h += '<div class="mark" style="left:' + pct(peak) + '%"></div><span class="tag up ' + (pct(peak) > 85 ? "edge-r" : "") + '" style="left:' + pct(peak) + '%">peak ' + peak + "</span>";
+    $("range").innerHTML = h;
+
+    var v = $("rangeVerdict"), cls = "", msg;
+    if (!isFinite(clean)) msg = "Enter the clean-air value from the monitor.";
+    else if (!isFinite(peak)) msg = "Clean air sits at " + clean + " mV. Enter the peak to check the headroom.";
+    else if (peak >= CLIP) { cls = "bad"; msg = "Clipping. Hold the stimulus further away and measure again until the peak stays below " + CLIP + " mV."; }
+    else if (peak < clean * 1.15) { cls = "bad"; msg = "No usable response: the peak is only " + (peak / clean).toFixed(2) + "× clean air. Move the stimulus closer, and check the sensor has warmed up."; }
+    else if (peak < clean * 1.5) { cls = "warn"; msg = "Weak response: " + (peak / clean).toFixed(2) + "× clean air. It will work, but a closer or fresher stimulus gives the model more to learn from."; }
+    else { cls = "ok"; msg = "Good range: the peak is " + (peak / clean).toFixed(1) + "× clean air, with " + Math.round(CLIP - peak) + " mV of headroom before clipping."; }
+    v.className = "status " + cls; v.textContent = msg;
+  }
+
+  function renderTimer() {
+    var left = Math.ceil((state.warmEnd - Date.now()) / 1000), st = $("warmStatus");
+    if (!state.warmEnd) { $("clock").textContent = "5:00"; st.className = "status"; st.textContent = "Not started."; $("warmStart").textContent = "Start 5-minute timer"; return; }
+    $("warmStart").textContent = "Restart timer";
+    if (left > 0) {
+      $("clock").textContent = Math.floor(left / 60) + ":" + ("0" + left % 60).slice(-2);
+      st.className = "status warn"; st.textContent = "Warming up. Use the time to set out the stimuli.";
+    } else {
+      $("clock").textContent = "0:00"; st.className = "status ok"; st.textContent = "Warm. Go on to the range check.";
+    }
+  }
+
+  function renderAll() { renderTally(); renderPrep(); renderRounds(); renderSessions(); }
+
+  // session name
+  var sInput = $("session");
+  sInput.value = state.session;
+  sInput.addEventListener("input", function () {
+    var name = sInput.value.replace(/[^A-Za-z0-9-]+/g, "-").replace(/^-+/, "");
+    if (name !== sInput.value) sInput.value = name;
+    var old = state.session, next = name || "d1-desk";
+    if (next === old) return;
+    // An untouched session is renamed rather than left behind as an empty row.
+    var o = state.sessions[old];
+    if (o && !Object.keys(o.done || {}).length && !state.sessions[next]) { state.sessions[next] = o; delete state.sessions[old]; }
+    else if (o && !Object.keys(o.done || {}).length && !Object.keys(o.prep || {}).length) delete state.sessions[old];
+    state.session = next; confirmReset = false; save(); renderAll();
+  });
+  sInput.addEventListener("blur", function () { sInput.value = state.session; });
+
+  // range inputs
+  $("cleanMv").value = state.clean; $("peakMv").value = state.peak;
+  $("cleanMv").addEventListener("input", function (e) { state.clean = e.target.value; save(); renderRange(); });
+  $("peakMv").addEventListener("input", function (e) { state.peak = e.target.value; save(); renderRange(); });
+
+  $("warmStart").addEventListener("click", function () { state.warmEnd = Date.now() + 5 * 60 * 1000; save(); renderTimer(); });
+  setInterval(renderTimer, 500);
+
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.dataset && t.dataset.run) {
+      if (t.checked) cur().done[t.dataset.run] = true; else delete cur().done[t.dataset.run];
+      save(); t.closest(".run").classList.toggle("done", t.checked); renderTally(); renderSessions();
+    } else if (t.dataset && t.dataset.prep) {
+      if (t.checked) cur().prep[t.dataset.prep] = true; else delete cur().prep[t.dataset.prep];
+      save();
+    }
+  });
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("button"); if (!t) return;
+    if (t.dataset.copy) {
+      var text = t.dataset.copy, pre = t.parentNode.querySelector("pre");
+      var done = function () { t.textContent = "Copied"; setTimeout(function () { t.textContent = "Copy"; }, 1400); };
+      var select = function () { var r = document.createRange(); r.selectNodeContents(pre); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); t.textContent = "Selected"; setTimeout(function () { t.textContent = "Copy"; }, 1800); };
+      try { navigator.clipboard.writeText(text).then(done, select); } catch (err) { select(); }
+    } else if (t.dataset.open) {
+      state.session = t.dataset.open; sInput.value = state.session; confirmReset = false; save(); renderAll();
+    } else if (t.dataset.reset) {
+      if (t.dataset.reset === "yes") { cur().done = {}; cur().prep = {}; save(); confirmReset = false; renderAll(); }
+      else { confirmReset = t.dataset.reset === "ask"; renderSessions(); }
+    }
+  });
+
+  cur(); renderAll(); renderRange(); renderTimer();
+})();
+</script>
+</body>
+</html>

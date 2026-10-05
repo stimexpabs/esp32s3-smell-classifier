@@ -1,0 +1,5 @@
+idf_component_register(
+    SRCS "buzzer.c"
+    INCLUDE_DIRS "include"
+    PRIV_REQUIRES esp_driver_ledc esp_timer board
+)

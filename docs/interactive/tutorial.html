@@ -1,0 +1,988 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<title>MQ-135 Edge AI Tutorial</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column with a sticky chapter rail across the top. Prose and code sit on the page ground; only instruments you operate (calculators, the window explorer, the event simulator) get a raised surface. */
+:root {
+  --bg: #EDF0EE; --surface: #F8FAF9; --ink: #14201D; --muted: #55645F; --line: #C9D2CE;
+  --accent: #0B6B63; --accent-ink: #FFFFFF; --code-bg: #E1E7E4;
+  --c-clean: #56677A; --c-breath: #19788B; --c-alcohol: #5646B0; --c-smoke: #A85C12;
+  --ok: #24764A; --warn: #946000; --bad: #B03328;
+  --display: "IBM Plex Sans Condensed", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101615; --surface: #18201E; --ink: #E6ECE9; --muted: #9AA8A3; --line: #2E3A37;
+    --accent: #4FC4B8; --accent-ink: #06211E; --code-bg: #212C29;
+    --c-clean: #9FB0BF; --c-breath: #5CC0D3; --c-alcohol: #A99BF0; --c-smoke: #E3A057;
+    --ok: #6CC792; --warn: #E0B04A; --bad: #F0857A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101615; --surface: #18201E; --ink: #E6ECE9; --muted: #9AA8A3; --line: #2E3A37;
+  --accent: #4FC4B8; --accent-ink: #06211E; --code-bg: #212C29;
+  --c-clean: #9FB0BF; --c-breath: #5CC0D3; --c-alcohol: #A99BF0; --c-smoke: #E3A057;
+  --ok: #6CC792; --warn: #E0B04A; --bad: #F0857A;
+  color-scheme: dark;
+}
+
+html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.58; }
+.wrap { max-width: 880px; margin: 0 auto; padding-inline: 20px; padding-block: 28px 80px; display: flex; flex-direction: column; gap: 56px; }
+h1, h2, h3, h4 { font-family: var(--display); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: 2.4rem; letter-spacing: -0.01em; }
+h2 { font-size: 1.7rem; }
+h3 { font-size: 1.2rem; margin-top: 10px; }
+h4 { font-size: 1rem; font-family: var(--body); }
+p { margin: 0; max-width: 68ch; }
+a { color: var(--accent); }
+.lede { color: var(--muted); font-size: 1.06rem; }
+.eyebrow { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 16px; }
+.ch-head { display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--line); padding-top: 22px; }
+ul, ol { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 6px; max-width: 68ch; }
+code, .mono { font-family: var(--mono); font-size: 0.88em; }
+:not(pre) > code { background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 3px; }
+.num { font-variant-numeric: tabular-nums; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.small { font-size: 0.87rem; color: var(--muted); }
+.note { border-left: 3px solid var(--warn); padding: 2px 0 2px 14px; font-size: 0.95rem; }
+
+/* chapter rail */
+.rail { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.rail-in { max-width: 880px; margin: 0 auto; padding-inline: 20px; display: flex; gap: 14px; align-items: center; }
+.rail nav { display: flex; gap: 2px; overflow-x: auto; flex: 1; min-width: 0; padding-block: 8px; scrollbar-width: thin; }
+.rail a { flex: none; text-decoration: none; color: var(--muted); font-size: 0.84rem; padding: 5px 9px; border-radius: 4px; white-space: nowrap; display: inline-flex; gap: 6px; align-items: baseline; }
+.rail a b { font-family: var(--mono); font-weight: 500; }
+.rail a:hover { color: var(--ink); background: var(--code-bg); }
+.rail a.here { color: var(--accent-ink); background: var(--accent); }
+.rail a.done:not(.here) b { color: var(--ok); }
+.rail-count { flex: none; font-family: var(--mono); font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+
+/* code and commands */
+pre { margin: 0; font-family: var(--mono); font-size: 0.82rem; line-height: 1.5; }
+.code { background: var(--code-bg); border-radius: 4px; padding: 12px 14px; overflow-x: auto; }
+.cmd { display: flex; align-items: stretch; background: var(--code-bg); border-radius: 4px; min-width: 0; }
+.cmd pre { padding: 9px 12px; overflow-x: auto; flex: 1; min-width: 0; white-space: pre; }
+button { font: inherit; color: inherit; cursor: pointer; }
+.copy { flex: none; border: 0; border-left: 1px solid var(--line); background: transparent; padding: 0 12px; font-size: 0.8rem; color: var(--accent); font-weight: 500; border-radius: 0 4px 4px 0; }
+.copy:hover { background: var(--line); }
+.btn { border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); padding: 6px 13px; border-radius: 4px; font-weight: 500; font-size: 0.9rem; }
+.btn.quiet { background: transparent; color: var(--accent); }
+.btn.on { background: var(--accent); color: var(--accent-ink); }
+.file { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+
+/* code walkthrough: excerpt, then numbered notes */
+.walk { display: flex; flex-direction: column; gap: 10px; }
+.walk ol { font-size: 0.95rem; }
+
+/* instruments */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 18px; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.panel-title { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.fields { display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: flex-end; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 220px; }
+.field.fixed { flex: 0 0 auto; }
+.field label { font-size: 0.8rem; color: var(--muted); }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+select { font-family: var(--mono); font-size: 0.92rem; padding: 6px 8px; border: 1px solid var(--line); border-radius: 4px; background: var(--bg); color: var(--ink); }
+.readouts { display: flex; flex-wrap: wrap; gap: 12px 28px; }
+.readout { display: flex; flex-direction: column; gap: 1px; }
+.readout span { font-size: 0.78rem; color: var(--muted); }
+.readout b { font-family: var(--mono); font-weight: 500; font-size: 1.12rem; font-variant-numeric: tabular-nums; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.status.ok { color: var(--ok); } .status.warn { color: var(--warn); } .status.bad { color: var(--bad); }
+.dot { width: 0.6em; height: 0.6em; display: inline-block; flex: none; background: var(--muted); }
+.dot.clean { background: var(--c-clean); } .dot.breath { background: var(--c-breath); }
+.dot.alcohol { background: var(--c-alcohol); } .dot.smoke { background: var(--c-smoke); }
+.lbl { font-family: var(--mono); font-weight: 500; font-size: 0.9rem; display: inline-flex; gap: 7px; align-items: baseline; }
+
+/* bars */
+.range { position: relative; height: 62px; margin-inline: 6px; }
+.range .track { position: absolute; left: 0; right: 0; top: 26px; height: 12px; background: var(--code-bg); border: 1px solid var(--line); }
+.range .zone { position: absolute; top: 26px; height: 12px; right: 0; background: var(--bad); opacity: 0.35; }
+.range .mark { position: absolute; top: 20px; width: 2px; height: 24px; background: var(--ink); }
+.range .tag { position: absolute; font-family: var(--mono); font-size: 0.72rem; white-space: nowrap; transform: translateX(-50%); }
+.range .tag.up { top: 0; } .range .tag.down { top: 44px; color: var(--muted); }
+.range .tag.l { transform: none; } .range .tag.r { transform: translateX(-100%); }
+
+/* pipeline and flow */
+.flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+.flow > div { flex: 1 1 108px; border: 1px solid var(--line); padding: 9px 10px; font-size: 0.82rem; background: var(--surface); min-width: 0; }
+.flow > div b { display: block; font-family: var(--mono); font-weight: 500; font-size: 0.84rem; }
+.flow > div span { color: var(--muted); }
+.flow > div.pc { border-style: dashed; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 24px; }
+.stat { border-top: 2px solid var(--line); padding-block: 10px 6px; display: flex; flex-direction: column; }
+.stat b { font-family: var(--mono); font-weight: 500; font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 0.84rem; color: var(--muted); }
+
+/* tables */
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+th, td { text-align: left; padding: 8px 14px 8px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 500; color: var(--muted); font-size: 0.8rem; }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); }
+.cm td.n { padding: 8px 10px; }
+.cm td.cell { color: var(--ink); }
+
+/* charts */
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+svg.chart .axis { stroke: var(--line); stroke-width: 1; fill: none; }
+svg.chart .grid { stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 3; fill: none; }
+svg.chart .trace { fill: none; stroke-width: 1.8; stroke-linejoin: round; }
+svg.chart .band { fill: var(--accent); opacity: 0.16; }
+svg.chart .refband { fill: var(--accent); opacity: 0.4; }
+svg.chart .onset { stroke: var(--ink); stroke-width: 1; stroke-dasharray: 4 3; }
+.s-clean { stroke: var(--c-clean); } .s-breath { stroke: var(--c-breath); } .s-alcohol { stroke: var(--c-alcohol); } .s-smoke { stroke: var(--c-smoke); }
+
+/* model layers */
+.layers { display: flex; flex-direction: column; gap: 0; }
+.layer { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr) minmax(0, 2fr); gap: 4px 16px; padding-block: 9px; border-top: 1px solid var(--line); font-size: 0.92rem; align-items: baseline; }
+.layer b { font-family: var(--mono); font-weight: 500; }
+.layer .shape { font-family: var(--mono); color: var(--muted); font-size: 0.84rem; }
+@media (max-width: 560px) { .layer { grid-template-columns: 1fr; } h1 { font-size: 1.9rem; } h2 { font-size: 1.45rem; } }
+
+/* event simulator */
+.sim-state { display: flex; flex-wrap: wrap; gap: 6px; }
+.sim-state span { font-family: var(--mono); font-size: 0.84rem; padding: 5px 11px; border: 1px solid var(--line); color: var(--muted); }
+.sim-state span.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.sim-log { font-family: var(--mono); font-size: 0.8rem; line-height: 1.5; background: var(--code-bg); border-radius: 4px; padding: 10px 12px; height: 13.5em; overflow-y: auto; white-space: pre-wrap; }
+.sim-log .ev { color: var(--accent); font-weight: 500; }
+
+.done-row { display: flex; gap: 10px; align-items: center; padding-top: 6px; }
+.done-row input { width: 1.15em; height: 1.15em; accent-color: var(--accent); }
+details { border-top: 1px solid var(--line); padding-block: 10px; }
+details summary { cursor: pointer; font-weight: 500; }
+details > div { padding-top: 8px; display: flex; flex-direction: column; gap: 8px; }
+</style>
+
+<div class="rail"><div class="rail-in">
+  <nav id="rail" aria-label="Chapters"></nav>
+  <span class="rail-count" id="railCount"></span>
+</div></div>
+
+<div class="wrap">
+
+<header style="display:flex;flex-direction:column;gap:14px">
+  <span class="eyebrow">ESP32-S3-WROOM-1 N16R8 · MQ-135 · TensorFlow Lite Micro</span>
+  <h1>A smell classifier that runs on the ESP32-S3</h1>
+  <p class="lede">One analog gas sensor, taken from raw voltage to a neural network running on the microcontroller itself. Eight steps, each with the firmware explained and something to try.</p>
+  <div class="flow" aria-label="The pipeline">
+    <div><b>MQ-135</b><span>gas changes its resistance</span></div>
+    <div><b>ADC</b><span>10 samples a second</span></div>
+    <div><b>Window</b><span>the last 10 s, 100 samples</span></div>
+    <div><b>Normalise</b><span>ln(v / start)</span></div>
+    <div><b>Model</b><span>516 parameters, int8</span></div>
+    <div><b>Event logic</b><span>vote over 5 s</span></div>
+    <div><b>Buzzer</b><span>1, 2 or 3 beeps</span></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b>2.3 ms</b><span>per inference on the board</span></div>
+    <div class="stat"><b>6,944 B</b><span>model in flash</span></div>
+    <div class="stat"><b>3,836 B</b><span>working memory</span></div>
+    <div class="stat"><b>29 / 32</b><span>events right after one session (optimistic: tested on the same sitting)</span></div>
+  </div>
+  <p class="small">The numbers and recordings on this page are from this project's first session. This is a demonstration: an MQ-135 cannot identify gases reliably and must not be used as a safety device. Ticks are saved in this browser only.</p>
+</header>
+
+<!-- 1 -->
+<section id="c1" data-ch="1" data-title="Hardware">
+  <div class="ch-head"><span class="eyebrow">Step 1</span><h2>Hardware: how the sensor makes a voltage</h2></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Part</th><th>Where</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>MQ-135 module, unmodified</td><td>VCC to 5 V, GND to GND</td><td>AO reaches <b>GPIO6 = ADC1 channel 5</b> through a 4.7k / 6.8k divider</td></tr>
+      <tr><td>Buzzer</td><td>GPIO38</td><td>passive, behind a transistor, driven by PWM</td></tr>
+      <tr><td>USB</td><td><code>/dev/ttyACM0</code></td><td>the chip's native USB port: power, flashing and console</td></tr>
+    </tbody>
+  </table></div>
+  <p>The sensor is a tin-dioxide element kept hot by a 5 V heater. Its resistance <b>Rs</b> drops when alcohol, ammonia, smoke or solvents reach the surface. On the module, Rs and a load resistor <b>RL</b> form a divider across 5 V, and the output AO is the voltage across RL. More gas means lower Rs and a higher AO.</p>
+  <p>AO can approach 5 V and the ESP32-S3's ADC pin measures up to about 3.1 V, so the board scales it down with 4.7k over 6.8k. That divider also sits in parallel with RL, so the sensor works into a smaller load than the resistor printed on the module.</p>
+  <div class="code"><pre>RL_eff = RL ∥ 11.5k
+AO     = 5 V × RL_eff / (Rs + RL_eff)
+V_pin  = AO × 68 / 115</pre></div>
+  <div class="panel">
+    <span class="panel-title">Try it · the sensor as a voltage divider</span>
+    <div class="fields">
+      <div class="field fixed"><label for="rl">Load resistor on the module</label>
+        <select id="rl"><option value="1000">1 kΩ (marked 102)</option><option value="2000" selected>2 kΩ (marked 202)</option><option value="10000">10 kΩ (marked 103)</option></select></div>
+      <div class="field"><label for="rs">Sensor resistance Rs: <b class="mono" id="rsOut"></b></label><input type="range" id="rs" min="0" max="1000" value="0"></div>
+    </div>
+    <div class="readouts">
+      <div class="readout"><span>Effective load</span><b id="rlEff"></b></div>
+      <div class="readout"><span>Sensor output AO</span><b id="aoOut"></b></div>
+      <div class="readout"><span>Voltage at GPIO6</span><b id="pinOut"></b></div>
+    </div>
+    <div class="range" id="divBar" role="img" aria-label="Pin voltage on the 0 to 3100 millivolt ADC range"></div>
+    <p class="small" id="divNote"></p>
+  </div>
+  <p>On this board clean air sat between Rs ≈ 45 kΩ and 210 kΩ on the same evening. With the stock 2 kΩ load that is only 24 to 110 mV at the pin, which is why the firmware averages many ADC reads per sample.</p>
+  <h3>Burn-in and warm-up</h3>
+  <ul>
+    <li><b>Once:</b> leave a new sensor powered for 24 to 48 hours.</li>
+    <li><b>Every session:</b> power the board for at least 5 minutes before recording or testing.</li>
+  </ul>
+  <label class="done-row"><input type="checkbox" id="done-1" data-done="1">Sensor plugged in and warmed up</label>
+</section>
+
+<!-- 2 -->
+<section id="c2" data-ch="2" data-title="Project setup">
+  <div class="ch-head"><span class="eyebrow">Step 2</span><h2>Project setup</h2></div>
+  <p>The firmware uses ESP-IDF 6.0.1. Activate it once in every new terminal, or <code>idf.py</code> is not found:</p>
+  <div class="cmd"><pre>. ~/.espressif/tools/activate_idf_v6.0.1.sh   # or: . $HOME/esp/esp-idf/export.sh</pre><button class="copy" type="button">Copy</button></div>
+  <p>The PC tools and the training scripts run from a virtual environment inside the project, in a terminal where ESP-IDF is <b>not</b> activated:</p>
+  <div class="cmd"><pre>python3 -m venv .venv &amp;&amp; .venv/bin/pip install -r training/requirements.txt -r tools/requirements.txt</pre><button class="copy" type="button">Copy</button></div>
+  <h3>What is where</h3>
+  <div class="code"><pre>firmware/components/board/    board_config.h: pins and resistor values
+firmware/components/buzzer/   driver shared by both firmwares
+firmware/data_logger/         step 3: streams sensor readings over USB
+firmware/inference/           step 8: classifies on the board and beeps
+tools/                        collect.py  check_dataset.py  plot.py  replay.py
+training/                     preprocess.py  train.py  convert.py
+data/raw/&lt;label&gt;/              one CSV per recorded event
+docs/                         the same eight chapters as text</pre></div>
+  <h3>Three settings specific to this board</h3>
+  <div class="walk">
+    <span class="file">firmware/data_logger/sdkconfig.defaults</span>
+    <div class="code"><pre>CONFIG_IDF_TARGET="esp32s3"
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_ESP_CONSOLE_USB_SERIAL_JTAG=y</pre></div>
+    <ol>
+      <li><b>The module.</b> N16R8 means 16 MB of flash and 8 MB of octal PSRAM. GPIO26 to 37 belong to them and must not be used for anything else.</li>
+      <li><b>The console is on native USB.</b> <code>printf</code> goes to the chip's built-in USB serial device, and the PC can send bytes back. No USB-to-UART adapter is involved.</li>
+      <li><b>The build is minimal.</b> <code>idf_build_set_property(MINIMAL_BUILD ON)</code> in <code>CMakeLists.txt</code> compiles only the components <code>main</code> names in its <code>REQUIRES</code> list. Leave one out and the build fails with a message naming it.</li>
+    </ol>
+  </div>
+  <h3>Build and flash</h3>
+  <div class="cmd"><pre>cd firmware/data_logger &amp;&amp; idf.py -p /dev/ttyACM0 flash monitor</pre><button class="copy" type="button">Copy</button></div>
+  <p>Leave the monitor with <code>Ctrl+]</code>. Flashing replaces whatever firmware is on the board, and only one program at a time can hold the serial port.</p>
+  <label class="done-row"><input type="checkbox" id="done-2" data-done="2">Toolchain activates and the logger flashes</label>
+</section>
+
+<!-- 3 -->
+<section id="c3" data-ch="3" data-title="Logger firmware">
+  <div class="ch-head"><span class="eyebrow">Step 3 · firmware explained</span><h2>The data-logger firmware</h2></div>
+  <p>A model is only as good as its data, so the first firmware does nothing but measure. It streams the sensor to the PC and marks the moments a stimulus is applied.</p>
+  <div class="flow">
+    <div><b>app_main loop</b><span>every 100 ms: 64 ADC reads, average, print</span></div>
+    <div><b>command task</b><span>waits for a byte from the PC</span></div>
+    <div><b>buzzer timer</b><span>ends each beep without blocking</span></div>
+  </div>
+
+  <h3>Reading the ADC</h3>
+  <div class="walk">
+    <span class="file">firmware/data_logger/main/data_logger_main.c</span>
+    <div class="code"><pre>adc_oneshot_chan_cfg_t channel_config = {
+    .atten = ADC_ATTEN_DB_12,
+    .bitwidth = ADC_BITWIDTH_DEFAULT,
+};
+adc_oneshot_config_channel(adc, ADC_CHANNEL_5, &amp;channel_config);
+
+adc_cali_curve_fitting_config_t cali_config = {
+    .unit_id = ADC_UNIT_1, .chan = ADC_CHANNEL_5,
+    .atten = ADC_ATTEN_DB_12, .bitwidth = ADC_BITWIDTH_DEFAULT,
+};
+adc_cali_create_scheme_curve_fitting(&amp;cali_config, &amp;cali);</pre></div>
+    <ol>
+      <li><b>Oneshot mode</b> takes a reading when asked. At 10 Hz there is no need for the continuous, DMA-driven driver.</li>
+      <li><b>12 dB attenuation</b> gives the widest input range, about 0 to 3.1 V, which covers the 2.96 V the divider can deliver.</li>
+      <li><b>Calibration</b> converts raw counts to millivolts using correction values burned into each chip at the factory. Without it two boards report different voltages for the same input.</li>
+    </ol>
+  </div>
+
+  <h3>One sample is 64 reads, on a steady clock</h3>
+  <div class="walk">
+    <div class="code"><pre>TickType_t last_wake = xTaskGetTickCount();
+while (1) {
+    int64_t t_ms = now_ms();
+    int sum_mv = 0, reads = 0;
+    for (int i = 0; i &lt; OVERSAMPLE; i++) {            // OVERSAMPLE = 64
+        int raw, mv;
+        if (adc_oneshot_read(adc, MQ135_ADC_CHANNEL, &amp;raw) == ESP_OK &amp;&amp;
+            adc_cali_raw_to_voltage(cali, raw, &amp;mv) == ESP_OK) {
+            sum_mv += mv;
+            reads++;
+        }
+    }
+    int adc_cmv  = sum_mv * 100 / reads;                // hundredths of a millivolt
+    int true_cmv = (int)((int64_t)adc_cmv * DIVIDER_TOTAL_OHM / BOARD_DIVIDER_BOTTOM_OHM);  // × 115 / 68
+    ...
+    vTaskDelayUntil(&amp;last_wake, pdMS_TO_TICKS(SAMPLE_PERIOD_MS));
+}</pre></div>
+    <ol>
+      <li><b>Averaging</b> removes most of the ADC's noise and resolves well below its 1 mV steps. On the board the readings hold within about ±0.4 mV.</li>
+      <li><b>Integers only.</b> Values are carried in hundredths of a millivolt, so printing never needs floating-point formatting.</li>
+      <li><b><code>vTaskDelayUntil</code></b> wakes the loop every 100 ms measured from the previous wake-up. The time spent reading and printing does not add up as drift, and the model will assume evenly spaced samples.</li>
+      <li><b>Why 10 Hz:</b> the sensor responds over seconds. Ten samples a second capture a rise with room to spare and keep a 10-second window down to 100 numbers.</li>
+    </ol>
+  </div>
+
+  <h3>What it prints</h3>
+  <div class="code"><pre>D,42008,91.89,155.40,53.09</pre></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Field</th><th>Example</th><th>Meaning</th><th>Unit</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td><code>D</code></td><td>line type: a data sample (<code>M</code> is a marker)</td><td></td></tr>
+      <tr><td>2</td><td><code>42008</code></td><td>time since boot</td><td>ms</td></tr>
+      <tr><td>3</td><td><code>91.89</code></td><td>voltage at the ESP32 pin</td><td>mV</td></tr>
+      <tr><td>4</td><td><code>155.40</code></td><td>voltage at the sensor output</td><td>mV</td></tr>
+      <tr><td>5</td><td><code>53.09</code></td><td>sensor resistance Rs</td><td>kΩ</td></tr>
+    </tbody>
+  </table></div>
+  <p>The prefix lets the PC pick data out from ordinary log lines. The lines carry no units so that a script can parse them; <code>.venv/bin/python tools/collect.py monitor</code> shows the same values with units.</p>
+
+  <h3>Markers and commands</h3>
+  <div class="walk">
+    <div class="code"><pre>static void command_task(void *arg)
+{
+    uint8_t c;
+    while (1) {
+        if (usb_serial_jtag_read_bytes(&amp;c, 1, portMAX_DELAY) != 1) continue;
+        if (c == '1') {
+            buzzer_beep(BEEP_FREQ_HZ, BEEP_MS, 1);
+            printf("M,%lld,1\n", now_ms());
+        } else if (c == '0') {
+            buzzer_beep(BEEP_FREQ_HZ, BEEP_MS, 2);
+            printf("M,%lld,0\n", now_ms());
+        }
+    }
+}</pre></div>
+    <ol>
+      <li><b>A separate task</b> sleeps inside <code>usb_serial_jtag_read_bytes</code> until a byte arrives, so waiting for commands costs the sampling loop nothing.</li>
+      <li><b>The marker carries the board's own clock.</b> Samples and markers share one timebase, so USB delays cannot shift a label relative to the data.</li>
+      <li><b>One beep</b> tells you to apply the stimulus, <b>two</b> to take it away.</li>
+    </ol>
+  </div>
+
+  <h3>The buzzer driver</h3>
+  <div class="walk">
+    <span class="file">firmware/components/buzzer/buzzer.c</span>
+    <div class="code"><pre>void buzzer_beep(uint32_t freq_hz, uint32_t on_ms, uint32_t count)
+{
+    esp_timer_stop(s_timer);          // replaces a pattern still playing
+    s_freq_hz = freq_hz;
+    s_on_us = on_ms * 1000;
+    s_remaining = count;
+    set_tone(true);                   // LEDC: set frequency, 50% duty
+    esp_timer_start_once(s_timer, s_on_us);
+}
+
+static void step_cb(void *arg)        // runs at the end of every beep and pause
+{
+    if (s_sounding) {
+        set_tone(false);
+        if (--s_remaining == 0) return;
+    } else {
+        set_tone(true);
+    }
+    esp_timer_start_once(s_timer, s_on_us);
+}</pre></div>
+    <ol>
+      <li><b>A passive buzzer needs a square wave.</b> The LEDC peripheral generates PWM; the PWM frequency is the pitch and 50% duty is the loudest point.</li>
+      <li><b>No delays.</b> A one-shot <code>esp_timer</code> ends each beep and starts the next, so <code>buzzer_beep</code> returns at once and a beep never holds up a sample.</li>
+      <li><b><code>count</code></b> is the number of beeps, which the inference firmware uses to say which class it heard.</li>
+    </ol>
+  </div>
+  <label class="done-row"><input type="checkbox" id="done-3" data-done="3">The monitor shows a reading that reacts to a stimulus</label>
+</section>
+
+<!-- 4 -->
+<section id="c4" data-ch="4" data-title="Collect data">
+  <div class="ch-head"><span class="eyebrow">Step 4</span><h2>Collecting a dataset</h2></div>
+  <p>Four classes, recorded by hand: <span class="lbl"><i class="dot clean"></i>clean</span>, <span class="lbl"><i class="dot breath"></i>breath</span>, <span class="lbl"><i class="dot alcohol"></i>alcohol</span> and <span class="lbl"><i class="dot smoke"></i>smoke</span>. Each command records two events and saves one CSV per event:</p>
+  <div class="cmd"><pre>.venv/bin/python tools/collect.py record --label alcohol --session d1-desk --events 2</pre><button class="copy" type="button">Copy</button></div>
+  <div class="scroll"><table>
+    <thead><tr><th>Phase</th><th>Default</th><th>What you do</th></tr></thead>
+    <tbody>
+      <tr><td>baseline</td><td class="n">10 s</td><td>nothing; keep the sensor in clean air</td></tr>
+      <tr><td>expose</td><td class="n">5 s</td><td>one beep: hold the stimulus near the sensor</td></tr>
+      <tr><td>recover</td><td class="n">30 s or more</td><td>two beeps: take it away and wait</td></tr>
+    </tbody>
+  </table></div>
+  <ul>
+    <li><b>Sessions matter.</b> A session is one sitting. Whole sessions are held back to test the model, so record at least three, on different days or in different rooms: 8 events per class per session.</li>
+    <li><b>Vary on purpose.</b> Change the distance, the strength and the duration, and include clean recordings where the air is disturbed without a gas. The model learns whatever differs between the classes, and it should not be "2 cm for 5 seconds".</li>
+    <li><b>Check after each session</b> with <code>.venv/bin/python tools/check_dataset.py</code> and <code>.venv/bin/python tools/plot.py</code>.</li>
+  </ul>
+  <p>The bench procedure, with a round planner, a range check and a warm-up timer, is in the companion worksheet: <a href="collection-guide.html">MQ-135 Collection Guide</a>.</p>
+  <p class="note">Alcohol vapour is flammable. Close the bottle and move it away before lighting anything, and record smoke in a ventilated room.</p>
+  <label class="done-row"><input type="checkbox" id="done-4" data-done="4">At least one full session recorded and checked</label>
+</section>
+
+<!-- 5 -->
+<section id="c5" data-ch="5" data-title="Preprocess">
+  <div class="ch-head"><span class="eyebrow">Step 5</span><h2>Preprocessing: from a recording to model inputs</h2></div>
+  <p>The model looks at 10 seconds at a time: 100 samples. A recording is cut into many overlapping windows, and each is normalised using only what is inside it:</p>
+  <div class="code"><pre>ref  = mean(v[0..9])                    the window's first second
+x[i] = clip( ln(v[i] / ref), -1, 4 )    for all 100 samples</pre></div>
+  <ul>
+    <li><b>Dividing by <code>ref</code></b> removes the baseline. In the first session clean air fell from about 180 mV to 40 mV in 45 minutes, more than most of the responses being classified.</li>
+    <li><b>The logarithm</b> compresses the range. Alcohol reached 29 times its baseline and breath about 1.2 times; on a log scale those are 3.4 and 0.2.</li>
+    <li><b>Only the window.</b> The recording tools know when the stimulus started; the board never will. Anything computed from outside the window could not be reproduced on the device.</li>
+  </ul>
+  <div class="panel">
+    <span class="panel-title">Try it · slide the window along a real recording</span>
+    <div class="seg" id="evPick" role="group" aria-label="Recording"></div>
+    <svg class="chart" id="rawChart" viewBox="0 0 520 190" role="img" aria-label="Sensor voltage over the recording, with the 10 second window highlighted"></svg>
+    <div class="field"><label for="winStart">Window start: <b class="mono" id="winOut"></b></label><input type="range" id="winStart" min="0" max="300" value="70"></div>
+    <svg class="chart" id="featChart" viewBox="0 0 520 170" role="img" aria-label="The model input for this window"></svg>
+    <div class="readouts">
+      <div class="readout"><span>Reference (first second)</span><b id="refOut"></b></div>
+      <div class="readout"><span>Largest input value</span><b id="maxOut"></b></div>
+      <div class="readout"><span>Training label for this window</span><b id="labelOut"></b></div>
+    </div>
+    <p class="small" id="labelWhy"></p>
+  </div>
+  <h3>How a window gets its label</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>Where the stimulus onset falls</th><th>Label</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>after the window ends</td><td><code>clean</code></td><td>the window is all baseline</td></tr>
+      <tr><td>1 to 7 s into the window</td><td>the recording's class</td><td>at least 1 s of clean air and 3 s of response are visible</td></tr>
+      <tr><td>more than 15 s before the window starts</td><td><code>clean</code></td><td>only the recovery is visible; no new event is happening</td></tr>
+      <tr><td>anywhere else</td><td>not used</td><td>too little response to tell classes apart, or still changing fast</td></tr>
+    </tbody>
+  </table></div>
+  <div class="cmd"><pre>.venv/bin/python training/preprocess.py</pre><button class="copy" type="button">Copy</button></div>
+  <p>The first session gives 1,170 windows: 450 clean and 240 for each of the other classes. Each window remembers which recording and session it came from, because the next step must split the data by them.</p>
+  <label class="done-row"><input type="checkbox" id="done-5" data-done="5">Windows generated</label>
+</section>
+
+<!-- 6 -->
+<section id="c6" data-ch="6" data-title="Train">
+  <div class="ch-head"><span class="eyebrow">Step 6</span><h2>Training a 516-parameter network</h2></div>
+  <div class="cmd"><pre>.venv/bin/python training/train.py</pre><button class="copy" type="button">Copy</button></div>
+  <div class="layers" aria-label="Model layers">
+    <div class="layer"><b>Input</b><span class="shape">100 × 1</span><span>one normalised window</span></div>
+    <div class="layer"><b>Conv1D 8 × 5</b><span class="shape">96 × 8 · 48 params</span><span>eight small filters slide along the window: "rising fast", "falling slowly"</span></div>
+    <div class="layer"><b>MaxPooling 2</b><span class="shape">48 × 8</span><span>halves the length, keeps the strongest response</span></div>
+    <div class="layer"><b>Conv1D 16 × 3</b><span class="shape">46 × 16 · 400 params</span><span>combinations: "sharp rise then slow fall"</span></div>
+    <div class="layer"><b>GlobalAveragePooling</b><span class="shape">16</span><span>how much of each pattern the window holds, wherever it occurs</span></div>
+    <div class="layer"><b>Dense + softmax</b><span class="shape">4 · 68 params</span><span>one probability per class</span></div>
+  </div>
+  <ul>
+    <li><b>Convolutions</b> recognise a rise wherever it sits in the window, which matters because on the board an event can start anywhere.</li>
+    <li><b>Global average pooling</b> replaces a large dense layer that would hold most of the parameters and learn where the training events happened to be.</li>
+    <li><b>Small on purpose.</b> With a few hundred windows, a larger model would memorise them.</li>
+  </ul>
+  <h3>Testing it honestly</h3>
+  <p>Overlapping windows from one event are near-copies. If some landed in training and others in testing, the test would measure memory. So whole events are held out together, and once three sessions exist, whole sessions are. With one session the figure below is optimistic, because training and test share a sitting.</p>
+  <div class="scroll"><table class="cm" id="cm" aria-label="Confusion matrix after the first session"></table></div>
+  <p class="small">Rows are what the window really was, columns what the model said. The diagonal is correct. Counted per event: 29 of 32 right.</p>
+  <ul>
+    <li><b>Alcohol and smoke are separated mostly by size.</b> The weakest alcohol event (3× baseline) was called smoke and the strongest smoke event (7×) was called alcohol. Size depends on distance, not on the gas.</li>
+    <li><b>Breath and clean overlap.</b> Breath raises the signal by about 1.2×, and clean air drifted nearly as much.</li>
+    <li><b>Nothing strong is mistaken for clean.</b> Detecting that something happened is the easy part.</li>
+  </ul>
+  <p>The next sessions should therefore include weak alcohol from far away, strong smoke from close up, and breath held closer. If alcohol and smoke still cannot be told apart once their sizes overlap, the sensor does not carry the difference, and a class should be merged or dropped.</p>
+  <label class="done-row"><input type="checkbox" id="done-6" data-done="6">Model trained and the confusion matrix read</label>
+</section>
+
+<!-- 7 -->
+<section id="c7" data-ch="7" data-title="Quantise">
+  <div class="ch-head"><span class="eyebrow">Step 7</span><h2>Quantising to 8 bits and converting to C</h2></div>
+  <div class="cmd"><pre>.venv/bin/python training/convert.py</pre><button class="copy" type="button">Copy</button></div>
+  <p>The trained model stores 32-bit floats. The board runs it with 8-bit integers: a quarter of the size, and the arithmetic microcontroller libraries optimise hardest. Every tensor gets a <b>scale</b> and a <b>zero point</b> that map real values onto the 256 levels of an <code>int8</code>:</p>
+  <div class="code"><pre>real_value = scale × (int8_value − zero_point)</pre></div>
+  <p>The converter chooses them by running 300 real windows through the model and watching the range of values in each layer. For the input it chose scale 0.014355 and zero point −108.</p>
+  <div class="panel">
+    <span class="panel-title">Try it · one sample on its way into the model</span>
+    <div class="field"><label for="ratio">Sample voltage relative to the window's start: <b class="mono" id="ratioOut"></b></label><input type="range" id="ratio" min="0" max="1000" value="330"></div>
+    <div class="readouts">
+      <div class="readout"><span>Feature x = ln(ratio), clipped</span><b id="qx"></b></div>
+      <div class="readout"><span>int8 sent to the model</span><b id="qq"></b></div>
+      <div class="readout"><span>Value the model sees</span><b id="qback"></b></div>
+      <div class="readout"><span>Rounding error</span><b id="qerr"></b></div>
+    </div>
+    <div class="range" id="qBar" role="img" aria-label="Position on the int8 range from minus 128 to 127"></div>
+    <p class="small" id="qNote"></p>
+  </div>
+  <div class="walk">
+    <span class="file">training/convert.py</span>
+    <div class="code"><pre>converter = tf.lite.TFLiteConverter.from_keras_model(model)
+converter.optimizations = [tf.lite.Optimize.DEFAULT]
+converter.representative_dataset = representative
+converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+converter.inference_input_type = tf.int8
+converter.inference_output_type = tf.int8</pre></div>
+    <ol>
+      <li><b>The representative dataset</b> is real data, so the measured ranges are the ones the board will meet.</li>
+      <li><b>The last three lines</b> demand integers everywhere, input and output included. Without them the firmware would need float kernels after all.</li>
+      <li><b>The C array.</b> A microcontroller has no file to load, so the script writes the model bytes into <code>firmware/inference/main/model_data.cc</code>, and the window length, clip limits and class names into <code>model_data.h</code>.</li>
+    </ol>
+  </div>
+  <div class="scroll"><table>
+    <tbody>
+      <tr><td>Model size</td><td class="n">6,944 bytes</td></tr>
+      <tr><td>Float and int8 give the same answer</td><td class="n">96.4% of windows</td></tr>
+      <tr><td>Accuracy cost of quantising</td><td class="n">1.4 points</td></tr>
+      <tr><td>Operators</td><td><code>CONV_2D EXPAND_DIMS FULLY_CONNECTED MAX_POOL_2D MEAN RESHAPE SOFTMAX</code></td></tr>
+    </tbody>
+  </table></div>
+  <label class="done-row"><input type="checkbox" id="done-7" data-done="7">Model converted and the C files generated</label>
+</section>
+
+<!-- 8 -->
+<section id="c8" data-ch="8" data-title="Inference firmware">
+  <div class="ch-head"><span class="eyebrow">Step 8 · firmware explained</span><h2>The inference firmware</h2></div>
+  <p>The last firmware does everything on the ESP32-S3. The PC only shows the output.</p>
+  <div class="flow">
+    <div><b>sensor_read_mv</b><span>64 reads, every 100 ms</span></div>
+    <div><b>ring buffer</b><span>the newest 100 samples</span></div>
+    <div><b>classify</b><span>normalise, quantise, Invoke</span></div>
+    <div><b>track_event</b><span>streak, vote, hold-off</span></div>
+    <div><b>announce</b><span>print and beep</span></div>
+    <div class="pc"><b>replay task</b><span>test windows from the PC</span></div>
+  </div>
+
+  <h3>Build and flash</h3>
+  <p>The first build compiles about 840 files, most of them TensorFlow Lite Micro. On a PC with 8 GB of RAM, limit the parallel jobs:</p>
+  <div class="cmd"><pre>cd firmware/inference &amp;&amp; idf.py reconfigure &amp;&amp; ninja -C build -j 3</pre><button class="copy" type="button">Copy</button></div>
+  <div class="cmd"><pre>idf.py -p /dev/ttyACM0 flash monitor</pre><button class="copy" type="button">Copy</button></div>
+
+  <h3>Setting up the interpreter</h3>
+  <div class="walk">
+    <span class="file">firmware/inference/main/inference_main.cc · model_init()</span>
+    <div class="code"><pre>const tflite::Model *model = tflite::GetModel(g_model_data);
+
+static tflite::MicroMutableOpResolver&lt;7&gt; resolver;
+resolver.AddConv2D();
+resolver.AddExpandDims();
+resolver.AddFullyConnected();
+resolver.AddMaxPool2D();
+resolver.AddMean();
+resolver.AddReshape();
+resolver.AddSoftmax();
+
+static tflite::MicroInterpreter interpreter(model, resolver, s_arena, TENSOR_ARENA_BYTES);
+interpreter.AllocateTensors();
+s_input  = interpreter.input(0);
+s_output = interpreter.output(0);</pre></div>
+    <ol>
+      <li><b><code>GetModel</code></b> reads the model in place from flash. Nothing is copied to RAM.</li>
+      <li><b>The resolver</b> lists the seven operators from step 7. Only these are linked into the firmware; leave one out and <code>AllocateTensors</code> fails at start-up.</li>
+      <li><b>The tensor arena</b> is a plain byte array holding every intermediate result. TensorFlow Lite Micro never calls <code>malloc</code>. The firmware gives it 16 kB and it used 3,836 bytes.</li>
+      <li><b>C++.</b> The library is C++, so this file is <code>.cc</code> and declares <code>extern "C" void app_main(void)</code>.</li>
+    </ol>
+  </div>
+
+  <h3>From voltages to an answer</h3>
+  <div class="walk">
+    <span class="file">classify()</span>
+    <div class="code"><pre>float ref = 0.0f;
+for (int i = 0; i &lt; MODEL_REF_SAMPLES; i++) ref += v[i];
+ref /= MODEL_REF_SAMPLES;
+
+const float scale = s_input-&gt;params.scale;
+const int zero_point = s_input-&gt;params.zero_point;
+for (int i = 0; i &lt; MODEL_WINDOW; i++) {
+    float x = v[i] &gt; 0.0f ? logf(v[i] / ref) : MODEL_CLIP_LO;
+    x = fminf(fmaxf(x, MODEL_CLIP_LO), MODEL_CLIP_HI);
+    long q = lroundf(x / scale) + zero_point;
+    s_input-&gt;data.int8[i] = (int8_t)(q &lt; -128 ? -128 : q &gt; 127 ? 127 : q);
+}
+
+s_interpreter-&gt;Invoke();
+memcpy(out, s_output-&gt;data.int8, MODEL_CLASS_COUNT);</pre></div>
+    <ol>
+      <li><b>The same maths as step 5,</b> line for line: reference from the first second, logarithm, clip.</li>
+      <li><b>Nothing is typed in twice.</b> <code>MODEL_WINDOW</code>, <code>MODEL_REF_SAMPLES</code> and the clip limits come from <code>model_data.h</code>, which <code>convert.py</code> writes from the constants in <code>preprocess.py</code>. The scale and zero point are read from the model. Retraining cannot leave the firmware out of step.</li>
+      <li><b>The output</b> is four <code>int8</code> values. With scale 1/256 and zero point −128, a byte of 127 means a probability of about 1.0.</li>
+      <li><b>A mutex</b> guards the interpreter, because the sampling loop and the replay task both use it.</li>
+    </ol>
+  </div>
+
+  <h3>The main loop</h3>
+  <div class="walk">
+    <span class="file">app_main()</span>
+    <div class="code"><pre>float mv = sensor_read_mv();
+s_ring[s_ring_next] = mv;
+s_ring_next = (s_ring_next + 1) % MODEL_WINDOW;
+since_infer++;
+
+if (s_ring_count == MODEL_WINDOW &amp;&amp; since_infer &gt;= SAMPLES_PER_INFER) {
+    since_infer = 0;
+    for (int i = 0; i &lt; MODEL_WINDOW; i++)                 // oldest sample first
+        window[i] = s_ring[(s_ring_next + i) % MODEL_WINDOW];
+
+    int64_t infer_us = classify(window, out);
+    ...
+    track_event(confident ? best : 0);
+}
+vTaskDelayUntil(&amp;last_wake, pdMS_TO_TICKS(SAMPLE_PERIOD_MS));</pre></div>
+    <ol>
+      <li><b>A ring buffer</b> always holds the newest 100 samples without moving any data. <code>s_ring_next</code> points at the oldest one, which the next sample overwrites.</li>
+      <li><b>Unrolling</b> copies the ring out oldest-first, so the model sees the window in the same order as a training window.</li>
+      <li><b>Once a second</b> is often enough for a signal that changes over seconds, and it keeps the processor idle 99.8% of the time.</li>
+      <li><b>The first answer</b> comes after 10 seconds, when the buffer has filled.</li>
+    </ol>
+  </div>
+
+  <h3>From predictions to events</h3>
+  <p>The model answers once a second, and one answer is not an event. While a response is still rising, the window holds only its first second or two, which the model never saw in training. So the firmware waits and votes.</p>
+  <div class="panel">
+    <span class="panel-title">Try it · feed the event logic one prediction per second</span>
+    <div class="sim-state" id="simState"><span data-s="IDLE">IDLE</span><span data-s="VOTING">VOTING</span><span data-s="HOLDOFF">HOLD-OFF</span></div>
+    <div class="seg" id="simFeed">
+      <button class="btn quiet" type="button" data-feed="0">clean</button>
+      <button class="btn quiet" type="button" data-feed="1">breath</button>
+      <button class="btn quiet" type="button" data-feed="2">alcohol</button>
+      <button class="btn quiet" type="button" data-feed="3">smoke</button>
+    </div>
+    <div class="seg">
+      <button class="btn" type="button" data-play="alcohol">Play an alcohol swab</button>
+      <button class="btn" type="button" data-play="blip">Play a hand wave</button>
+      <button class="btn quiet" type="button" data-play="reset">Reset</button>
+    </div>
+    <div class="sim-log" id="simLog" aria-live="polite"></div>
+    <p class="small">A prediction below 60% confidence is treated as clean before it reaches this logic.</p>
+  </div>
+  <div class="walk">
+    <span class="file">track_event()</span>
+    <div class="code"><pre>case IDLE:
+    streak = cls != 0 ? streak + 1 : 0;
+    if (streak &gt;= START_STREAK) { /* clear votes */ state = VOTING; }      // 2 in a row
+    break;
+
+case VOTING:
+    votes[cls]++;
+    if (++collected &lt; VOTE_PREDICTIONS) break;                          // collect 5
+    /* winner = non-clean class with the most votes */
+    if (event_votes &gt;= MIN_EVENT_VOTES) {                               // at least 3
+        announce(winner);
+        holdoff = HOLDOFF_S;  state = HOLDOFF;                          // 20 s
+    } else {
+        state = IDLE;
+    }
+    break;
+
+case HOLDOFF:
+    if (--holdoff &lt;= 0) state = IDLE;
+    break;</pre></div>
+    <ol>
+      <li><b>Idle.</b> Two non-clean predictions in a row open a vote. One alone is ignored.</li>
+      <li><b>Voting.</b> Five more predictions are collected, which lands them in the part of the response the model was trained on. With at least three non-clean votes the leading class is announced; otherwise it was a blip.</li>
+      <li><b>Hold-off.</b> For 20 seconds nothing new is announced while the sensor recovers, so one event is reported once.</li>
+      <li><b><code>announce</code></b> prints <code>&gt;&gt;&gt; EVENT: &lt;class&gt;</code> and calls <code>buzzer_beep</code> with the class index as the count: once for breath, twice for alcohol, three times for smoke. Expect it 6 to 8 seconds after the stimulus starts.</li>
+    </ol>
+  </div>
+
+  <h3>What it prints</h3>
+  <div class="code"><pre>   12.9 s     36.0 mV  clean     87%   | clean 87% breath 13% alcohol 1% smoke 0% | 2270 us</pre></div>
+  <p>Time since boot, sensor voltage, the winning class and its probability (followed by <code>?</code> when below 60%), all four probabilities, and how long the interpreter took.</p>
+
+  <h3>Check: the board agrees with the PC</h3>
+  <p>A model that works in Python and fails on the board is nearly always a preprocessing mismatch, and watching live output will not reveal it. The replay test sends recorded windows of raw voltage to the board, which runs them through its own normalisation and model, and compares the output bytes with the PC's:</p>
+  <div class="cmd"><pre>.venv/bin/python tools/replay.py --count 300</pre><button class="copy" type="button">Copy</button></div>
+  <div class="code"><pre>300 windows: same class on 300/300, identical outputs on 300/300, largest output difference 0 of 255</pre></div>
+  <div class="walk">
+    <span class="file">replay_task()</span>
+    <div class="code"><pre>// PC sends:    R &lt;v0&gt; &lt;v1&gt; ... &lt;v99&gt;\n
+// board says:  R,&lt;out0&gt;,&lt;out1&gt;,&lt;out2&gt;,&lt;out3&gt;
+while (count &lt; MODEL_WINDOW) {
+    char *end;
+    float value = strtof(cursor, &amp;end);
+    if (end == cursor) break;
+    v[count++] = value;
+    cursor = end;
+}
+if (count != MODEL_WINDOW || classify(v, out) &lt; 0) { printf("R,error\n"); continue; }</pre></div>
+    <ol>
+      <li><b>The same <code>classify()</code></b> the live loop uses, so the test exercises the real code path.</li>
+      <li><b>Raw voltages go in,</b> not features, so the board's own normalisation is part of what is tested.</li>
+      <li><b>The PC side uses TensorFlow Lite's reference kernels,</b> which round exactly as the board's library does. The default PC kernels differ by one step now and then, which was enough to flip 2 of 80 borderline windows.</li>
+    </ol>
+  </div>
+  <div class="scroll"><table>
+    <thead><tr><th>Cost on the board</th><th class="n">Measured</th></tr></thead>
+    <tbody>
+      <tr><td>Inference time, once a second</td><td class="n">2.3 ms</td></tr>
+      <tr><td>Tensor arena</td><td class="n">3,836 bytes</td></tr>
+      <tr><td>Model in flash</td><td class="n">6,944 bytes</td></tr>
+      <tr><td>Whole firmware image</td><td class="n">304 kB</td></tr>
+    </tbody>
+  </table></div>
+  <label class="done-row"><input type="checkbox" id="done-8" data-done="8">Inference runs on the board and replay matches</label>
+</section>
+
+<!-- 9 -->
+<section id="c9" data-ch="9" data-title="Improve">
+  <div class="ch-head"><span class="eyebrow">After the first model</span><h2>The improvement loop</h2></div>
+  <p>The board runs one firmware at a time. To add data, flash the logger, record a new session, then retrain and flash the classifier again.</p>
+  <div class="cmd"><pre>cd firmware/data_logger &amp;&amp; idf.py -p /dev/ttyACM0 flash</pre><button class="copy" type="button">Copy</button></div>
+  <div class="cmd"><pre>.venv/bin/python training/preprocess.py &amp;&amp; .venv/bin/python training/train.py &amp;&amp; .venv/bin/python training/convert.py</pre><button class="copy" type="button">Copy</button></div>
+  <div class="cmd"><pre>cd firmware/inference &amp;&amp; idf.py -p /dev/ttyACM0 flash monitor</pre><button class="copy" type="button">Copy</button></div>
+  <p>Only <code>model_data.cc</code> changes, so that last rebuild takes seconds. Once three sessions exist, <code>train.py</code> switches by itself to holding out whole sessions, and its figure becomes one you can trust.</p>
+  <div>
+    <details><summary>idf.py: command not found</summary><div><p>ESP-IDF is not activated in that terminal. Run <code>. ~/.espressif/tools/activate_idf_v6.0.1.sh</code> first.</p></div></details>
+    <details><summary>A tool cannot open /dev/ttyACM0</summary><div><p>Another program holds the port. Close the ESP-IDF monitor (<code>Ctrl+]</code>) or any other tool that is still running.</p></div></details>
+    <details><summary>plot.py fails with "No module named matplotlib"</summary><div><p>That terminal has ESP-IDF activated, which switches <code>python3</code> to ESP-IDF's own environment. Use a terminal without it, or <code>.venv/bin/python</code>.</p></div></details>
+    <details><summary>collect.py or replay.py says "No data" or "No answer"</summary><div><p>The board is running the other firmware. <code>collect.py</code> needs the data logger; <code>replay.py</code> needs the inference firmware.</p></div></details>
+    <details><summary>It works in Python and is wrong on the board</summary><div><p>Run the replay test. If the outputs differ, <code>model_data.cc</code> is stale: run <code>convert.py</code>, then rebuild and flash.</p></div></details>
+    <details><summary>The clean-air voltage is different every day</summary><div><p>That is normal for MQ sensors, and the reason every window is normalised to its own start.</p></div></details>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var EVENTS = {"clean":{"file":"clean/d1-desk_02.csv","v":[163.0,163.1,163.7,163.7,163.7,163.6,164.1,164.1,163.9,164.0,164.2,163.7,163.3,162.9,162.7,162.0,163.2,163.1,163.4,163.6,164.4,163.9,164.6,164.6,166.8,167.6,169.0,170.6,172.2,171.5,169.2,171.0,168.9,169.1,167.5,167.1,166.0,165.0,164.9,165.4,164.9,164.7,164.1,164.3,164.4,163.8,163.8,163.6,164.9,167.1,166.8,167.5,168.6,169.4,170.3,169.3,172.3,168.9,168.7,168.5,168.9,170.9,170.1,167.9,167.3,166.4,165.9,165.3,164.5,164.2,164.1,163.9,163.8,164.0,164.0,165.2,164.5,164.2,165.3,164.7,166.8,167.5,168.8,169.5,168.1,166.9,164.8,165.1,164.9,164.5,164.2,163.9,163.5,163.5,163.3,163.6,163.7,163.7,163.4,162.9,162.7,163.0,162.7,163.7,164.6,164.1,164.5,164.3,165.3,167.0,165.2,167.4,167.3,166.8,167.2,166.3,166.9,166.4,168.6,167.0,167.7,167.3,166.7,166.7,164.5,164.3,164.1,163.7,163.3,162.1,161.7,161.8,161.6,162.2,163.4,164.2,165.4,166.2,167.1,165.5,165.5,166.2,165.8,164.5,163.9,163.8,163.9,162.9,163.2,162.0,163.1,163.0,162.5,162.7,162.5,162.2,163.7,163.4,163.0,162.0,161.9,161.8,161.7,162.2,161.7,161.2,161.3,160.5,160.0,160.2,160.3,159.9,159.2,159.3,159.9,160.2,160.3,162.0,161.2,160.6,160.6,159.9,159.5,160.3,160.4,159.8,159.5,160.2,160.1,159.7,159.4,159.8,159.7,158.5,159.0,158.9,158.4,157.7,157.3,157.9,157.8,158.2,157.9,157.9,157.2,157.8,157.7,157.4,157.4,157.3,157.6,157.4,157.5,158.0,157.1,157.1,156.7,156.8,156.1,156.4,156.2,156.3,157.0,156.9,156.7,157.2,156.7,156.9,157.1,157.5,157.2,157.0,157.2,157.8,157.4,157.0,157.1,157.1,157.1,157.4,157.8,158.1,158.1,158.8,160.1,160.7,160.6,161.2,160.6,160.2,160.7,160.9,161.6,161.5,161.1,160.9,160.2,160.1,160.9,160.8,160.5,159.8,159.7,159.2,159.6,160.0,159.3,158.8,158.7,157.9,158.8,158.1,158.0,158.1,158.0,158.4,158.2,157.9,158.5,158.2,159.0,158.8,159.6,159.1,158.9,158.3,159.3,159.5,160.4,160.5,160.9,161.3,161.5,161.5,160.9,162.6,161.9,161.4,161.3,162.4,162.8,162.3,162.8,162.7,162.5,162.9,161.7,161.4,161.1,161.5,161.7,160.8,161.2,160.8,160.7,160.2,160.9,160.3,160.3,159.9,159.0,159.2,160.3,160.3,161.5,161.7,162.0,163.0,162.3,162.2,162.0,163.1,162.1,162.5,163.3,162.2,162.3,161.4,160.5,160.8,160.5,159.3,159.4,158.6,158.8,159.4,160.6,161.7,161.2,160.6,160.9,161.4,161.1,161.0,160.6,160.0,159.6,159.1,158.7,158.1,157.8,157.2,157.4,157.1,157.1,157.2,157.7,157.9,157.9,158.8,159.1,159.0,159.5,158.8,158.8,159.0,158.2,158.5,158.9,158.5,159.0,160.3,161.8,161.2,161.6,161.8,162.0,162.0,161.3,162.0,161.7,161.0,162.1,162.1,161.6,161.8,161.4,161.2,161.7,161.1,160.9,161.1,161.8,161.3,161.4,161.8,162.3,162.9,164.2,164.8,164.1,163.8,164.5,163.9,163.5,164.4,164.6,164.3,166.2,165.4,164.2,164.9,166.4,167.3,166.0,166.1,167.2,165.8,165.1,166.1,165.7,164.7,166.4,167.1,165.8,167.1,168.0,167.1,165.5,166.0,164.7,164.5,163.5,163.6,163.1,163.1,162.6,162.8,162.4,161.9,162.2],"onset":null},"breath":{"file":"breath/d1-desk_04.csv","v":[70.4,70.2,70.2,70.3,69.8,70.1,70.4,70.0,70.3,70.5,70.4,70.5,70.5,70.5,70.7,70.4,70.7,71.0,70.5,70.2,70.6,70.7,70.4,70.8,70.5,70.9,70.0,70.4,70.6,70.7,71.0,70.6,70.6,70.9,70.8,70.7,70.8,70.8,70.7,70.6,70.5,70.8,70.8,70.9,70.8,70.7,70.7,70.0,70.3,70.2,70.5,70.4,70.3,70.4,70.5,70.5,70.5,70.7,70.6,70.6,70.2,70.2,70.2,70.2,70.4,70.7,70.7,70.5,70.1,70.2,70.4,69.8,70.1,70.5,69.9,70.1,70.0,69.8,69.7,70.2,70.0,70.2,69.9,69.9,70.3,69.8,70.1,70.2,70.0,70.2,70.0,70.2,70.0,70.2,69.9,70.2,70.2,70.6,70.2,70.2,70.1,70.2,70.0,70.1,69.9,70.1,69.9,70.1,70.0,69.9,69.8,70.2,70.2,70.8,70.7,71.7,75.3,78.2,80.8,82.9,85.8,86.8,88.0,89.2,89.6,90.0,90.5,92.3,92.7,92.9,93.2,93.7,94.7,98.3,99.8,99.7,96.5,94.6,93.4,92.9,91.9,91.0,89.4,89.0,87.5,86.5,86.1,85.5,84.6,82.8,82.6,81.5,81.4,81.0,81.0,80.4,80.2,80.1,79.7,79.8,79.1,79.5,78.6,79.2,79.0,78.7,78.7,78.4,79.1,78.8,78.3,78.5,78.2,78.0,77.8,77.4,77.6,77.5,76.8,76.6,76.3,76.4,75.5,75.1,75.2,75.1,75.5,74.9,75.0,74.8,75.2,75.1,74.5,74.6,74.1,74.0,74.2,74.6,75.0,74.7,74.5,74.2,74.5,74.6,74.6,74.0,74.6,74.8,73.7,74.6,73.6,73.7,72.5,72.5,72.5,72.8,71.8,71.7,71.6,71.5,71.5,71.5,71.4,71.0,71.4,71.1,71.2,71.0,70.8,71.0,71.0,70.7,70.6,70.6,70.6,70.4,71.0,70.8,70.7,70.5,70.5,70.7,70.4,70.4,70.5,70.5,70.4,70.4,70.6,70.1,70.4,70.2,70.5,70.3,70.5,70.0,70.0,69.8,69.8,70.0,69.8,70.1,69.7,70.1,69.8,69.6,69.7,69.4,69.0,69.7,69.3,69.3,69.5,69.3,69.6,69.3,69.6,69.4,69.7,69.3,69.5,69.7,69.5,69.6,70.0,69.6,69.6,69.7,69.6,69.3,70.0,69.4,69.7,69.5,69.7,69.2,69.3,69.6,69.6,69.5,69.2,69.4,69.2,69.0,69.4,69.4,69.3,69.3,69.0,69.4,69.2,69.8,69.6,69.8,69.4,69.3,69.2,69.6,69.2,68.9,68.9,69.2,69.1,69.1,68.7,68.5,69.0,68.8,68.9,69.0,68.9,68.3,69.1,68.7,68.5,68.8,68.8,68.8,68.6,68.5,68.6,69.1,69.1,68.5,68.7,68.5,68.7,68.5,68.8,68.5,68.3,68.6,68.8,69.0,68.1,68.3,68.5,68.6,68.3,68.7,68.6,68.6,68.5,68.9,68.4,68.8,68.8,68.9,68.6,68.3,68.6,68.7,68.3,68.4,68.6,68.5,68.5,68.4,68.2,68.5,68.3,68.3,68.2,68.1,68.1,68.5,68.2,68.5,68.1,68.2,68.2,68.3,68.0,68.2,68.0,67.9,68.1,68.2,68.2,67.8,68.3,68.2,68.5,68.0,68.2,68.3,68.3,68.3,68.2,68.3,68.2,68.3,68.2,68.3,68.1,68.1,68.5,68.1,68.3,68.2,67.9,68.0,68.0,67.9,68.0,67.8,67.7,67.9,67.7,67.9,68.0],"onset":101},"alcohol":{"file":"alcohol/d1-desk_01.csv","v":[132.2,131.2,131.3,130.9,130.3,130.3,129.4,128.7,128.9,128.5,128.0,128.0,127.5,126.9,126.8,126.3,126.0,125.9,125.1,125.0,124.8,124.7,124.0,124.0,123.8,123.3,122.9,123.1,122.3,121.9,121.2,121.5,120.4,120.0,120.1,119.8,119.3,119.2,118.8,118.5,118.5,118.1,118.2,118.5,117.8,117.7,117.5,117.0,117.0,116.8,116.6,116.7,116.3,116.4,116.2,116.0,115.9,116.1,115.8,115.8,115.6,115.6,115.6,115.4,115.3,115.2,115.5,115.3,115.2,115.2,115.0,115.1,115.1,115.2,115.0,114.5,115.0,114.8,114.6,114.9,114.6,114.8,114.6,114.5,114.0,114.1,113.7,113.5,113.4,114.1,113.3,113.2,113.8,113.1,113.7,114.0,113.0,112.8,112.0,112.4,112.2,112.3,111.9,112.0,111.9,111.3,112.0,110.7,111.0,111.3,111.2,111.1,110.9,110.9,111.6,111.2,111.4,115.4,125.0,134.3,150.5,161.0,178.1,202.0,226.1,258.8,306.4,345.6,392.4,433.1,468.0,507.5,542.6,581.3,620.5,668.2,715.1,744.9,784.6,813.1,840.9,877.6,924.1,963.9,986.6,1000.4,1013.6,1021.7,1047.8,1064.5,1080.2,1097.7,1113.4,1145.2,1163.2,1172.9,1174.0,1172.0,1165.4,1156.0,1146.8,1132.0,1115.1,1098.0,1078.8,1059.1,1040.7,1015.2,994.5,974.1,953.7,929.2,911.9,895.5,876.1,855.4,833.1,812.9,791.1,774.6,745.5,728.4,711.1,693.7,677.8,655.7,640.2,626.3,609.4,595.6,580.5,560.8,550.6,535.4,521.6,508.3,497.2,485.9,470.6,462.3,450.3,442.2,434.4,422.8,415.7,407.8,398.5,392.9,379.4,374.7,369.1,364.1,356.2,349.8,345.0,342.0,336.2,329.3,324.9,321.1,317.1,311.9,308.0,305.1,300.1,295.7,287.2,284.0,280.1,277.5,275.5,271.2,269.2,266.5,263.1,260.3,257.9,256.8,254.7,252.2,250.3,247.3,245.4,242.0,238.4,236.1,235.1,234.4,233.0,231.2,229.5,227.6,226.7,225.7,224.5,223.0,221.0,219.0,216.5,214.9,212.8,211.4,210.2,208.9,207.2,206.6,206.2,205.5,204.5,204.0,202.5,201.3,198.6,194.7,191.6,189.8,188.9,188.3,187.5,186.2,185.7,184.6,184.4,184.2,183.5,183.1,182.5,182.2,180.8,180.0,179.3,179.1,178.4,177.7,176.3,175.9,175.6,175.3,174.8,174.4,174.2,173.7,172.8,171.8,169.7,169.3,168.1,167.1,166.2,166.4,165.1,164.6,164.5,164.1,163.7,163.5,162.9,162.7,162.1,161.5,161.0,161.0,160.6,160.5,160.2,159.9,159.2,158.8,158.4,158.1,157.6,157.6,157.0,156.8,156.5,156.3,156.3,155.8,155.8,155.9,155.7,155.7,155.6,155.6,155.6,155.6,155.6,155.3,155.1,155.1,155.0,154.4,154.2,154.2,154.0,153.9,153.8,153.6,153.4,153.1,152.4,152.2,151.9,151.5,151.5,151.7,151.7,151.4,151.0,150.6,150.4,150.3,150.6,150.4,150.1,149.7,149.2,149.2,148.3,147.7,147.2,147.3,147.1,146.9,146.3,146.0,145.9,145.7,145.4,144.8,145.0,145.1,144.5,144.3,144.4,144.0,143.5,143.6,143.3,143.9,143.9,143.8,143.2,143.1,142.9,142.5,142.1,142.1,142.3,142.1,141.8,141.4,140.8,140.9,140.5,140.7,140.1,138.8,138.2,138.3,137.7,137.7,136.9,137.0,136.8,136.6,136.4,136.1,135.4,135.5,135.4,135.0,134.8,134.9,134.7,134.3,134.3,133.9,133.9,134.3,133.7,133.8,133.8,133.5,133.5,133.5,133.4,133.1,133.2,133.0,133.6,133.0,133.0,132.9,132.8,132.4,132.3,132.2,132.3,132.3,132.2,132.0,131.9,131.9,131.9,131.7,131.5,131.4,131.4,131.3,131.3,131.3,130.9,131.0,131.1,130.5,130.6,130.6,130.7,130.2,130.1,129.9,129.8,129.7,129.4,129.3,129.0,129.1,128.5,128.5,128.9,128.0],"onset":101},"smoke":{"file":"smoke/d1-desk_01.csv","v":[123.5,123.1,122.4,121.9,120.7,121.3,121.0,121.0,120.2,120.1,120.3,119.9,120.1,119.9,120.0,120.9,120.2,119.8,120.5,120.4,120.1,119.8,120.2,119.6,119.9,119.7,119.4,119.4,118.7,118.5,118.2,117.7,117.5,117.2,116.8,116.4,116.3,116.0,116.4,116.0,116.3,116.1,116.5,116.0,116.5,116.3,116.7,116.3,116.4,116.4,116.8,116.4,116.1,116.2,116.1,115.7,115.7,115.3,115.1,115.0,114.8,114.5,114.2,114.0,112.9,113.3,112.5,111.7,110.9,110.2,109.8,109.6,108.9,109.1,108.8,108.5,107.3,107.7,107.5,107.3,107.2,107.0,106.7,106.1,106.5,106.3,105.7,105.9,106.0,105.8,105.6,105.6,105.5,105.8,105.8,105.7,105.6,105.7,105.6,106.1,106.1,106.0,106.5,106.4,106.6,106.8,107.0,107.2,107.2,107.3,107.8,107.5,107.9,108.0,107.6,115.0,123.1,133.0,144.6,154.0,155.7,156.6,170.3,191.7,220.6,232.2,255.0,271.9,286.5,296.0,299.5,317.1,341.8,330.2,323.3,332.6,344.7,354.8,365.3,364.8,371.0,386.7,405.8,409.8,414.8,417.5,417.4,419.6,421.5,416.6,421.4,421.9,426.6,417.7,400.0,383.4,361.8,339.0,318.9,303.5,284.4,275.6,265.5,257.5,253.9,248.8,243.8,237.7,235.3,233.0,229.8,227.0,225.6,223.5,221.0,217.2,215.2,213.4,211.6,210.1,209.1,207.4,206.5,206.4,205.6,204.6,203.5,202.8,201.4,199.1,195.1,191.2,189.6,188.6,187.9,187.0,186.6,186.1,185.5,184.9,184.6,184.3,184.1,183.2,182.8,182.0,181.4,180.0,179.4,178.5,178.0,177.4,176.6,176.0,175.9,175.6,175.3,174.9,174.9,174.5,174.1,173.8,173.8,172.3,171.7,169.6,168.8,168.2,167.2,166.8,166.3,165.7,164.9,164.8,164.9,164.1,164.3,164.2,163.8,163.9,163.5,163.3,163.2,163.3,162.7,162.7,162.6,162.7,162.6,162.2,162.7,162.3,161.9,161.7,161.8,162.3,162.0,161.6,161.5,161.6,161.4,161.2,160.9,161.1,160.7,160.7,160.3,160.4,159.7,159.4,159.2,158.1,157.7,157.5,157.3,156.8,156.9,156.7,156.1,155.7,155.7,155.7,155.6,155.6,155.5,155.3,155.2,154.5,154.7,153.9,153.6,153.3,153.5,152.9,152.3,151.9,151.4,151.3,151.0,150.9,150.7,150.8,150.5,149.9,150.6,150.1,149.8,149.7,149.4,150.0,149.8,150.0,150.1,149.2,149.2,148.6,148.3,147.8,147.1,146.6,146.1,145.4,145.2,144.8,143.7,143.7,142.6,142.1,142.0,141.4,140.5,139.4,139.2,138.5,137.5,137.0,135.9,136.1,135.4,135.2,134.8,134.8,134.4,134.5,134.4,134.0,134.5,134.4,134.4,135.0,135.3,135.7,135.2,135.2,134.8,134.6,134.3,134.7,134.2,133.8,133.5,133.4,133.8,133.1,132.9,132.7,132.7,132.2,131.6,131.8,131.6,131.0,130.9,130.7,130.2,129.8,129.7,129.8,129.2,128.9,128.7,128.6,128.0,127.8,127.3,127.1,127.2,126.6,126.2,125.9,126.0,125.5,125.0,124.7,124.3,124.1,123.7,123.1,122.3,121.0,121.2,120.5,119.3,118.6,118.0,117.6,117.4,117.2,116.6,116.4,116.6,116.1,115.9,115.7,115.5,115.4,115.1,115.0,115.0,114.7,114.8,114.6,114.4,114.0,113.4,112.5,112.5,112.2,111.4,110.4,110.8,110.3,109.7,109.7,109.5,109.1,108.8,108.6,108.4,108.7,107.6,108.0,107.3,107.3,107.1,106.7,106.7,106.4,106.4,106.2,105.9],"onset":101}};
+  var CLASSES = ["clean", "breath", "alcohol", "smoke"];
+  var KEY = "mq135-edge-ai-tutorial-v1";
+  var state = { done: {} };
+  try { var s = JSON.parse(localStorage.getItem(KEY) || "null"); if (s && s.done) state = s; } catch (e) {}
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) {} }
+  function $(id) { return document.getElementById(id); }
+  function fmt(v, d) { return v.toFixed(d); }
+
+  /* ---------- chapter rail and progress ---------- */
+  var sections = Array.prototype.slice.call(document.querySelectorAll("section[data-ch]"));
+  var rail = $("rail");
+  sections.forEach(function (sec) {
+    var a = document.createElement("a");
+    a.href = "#" + sec.id; a.dataset.ch = sec.dataset.ch;
+    a.innerHTML = "<b>" + (sec.dataset.ch === "9" ? "+" : sec.dataset.ch) + "</b>" + sec.dataset.title;
+    rail.appendChild(a);
+  });
+  function renderProgress() {
+    var n = 0;
+    Array.prototype.forEach.call(rail.children, function (a) {
+      var d = !!state.done[a.dataset.ch]; a.classList.toggle("done", d); if (d) n++;
+    });
+    $("railCount").textContent = n + "/8 done";
+    document.querySelectorAll("[data-done]").forEach(function (c) { c.checked = !!state.done[c.dataset.done]; });
+  }
+  document.addEventListener("change", function (e) {
+    var t = e.target;
+    if (t.dataset && t.dataset.done) {
+      if (t.checked) state.done[t.dataset.done] = true; else delete state.done[t.dataset.done];
+      save(); renderProgress();
+    }
+  });
+  if ("IntersectionObserver" in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (!en.isIntersecting) return;
+        Array.prototype.forEach.call(rail.children, function (a) {
+          var here = a.dataset.ch === en.target.dataset.ch;
+          a.classList.toggle("here", here);
+          if (here && rail.scrollWidth > rail.clientWidth) rail.scrollLeft = a.offsetLeft - rail.clientWidth / 2 + a.offsetWidth / 2;
+        });
+      });
+    }, { rootMargin: "-30% 0px -65% 0px" });
+    sections.forEach(function (s) { io.observe(s); });
+  }
+
+  /* ---------- copy buttons ---------- */
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest(".copy"); if (!t) return;
+    var pre = t.parentNode.querySelector("pre"), text = pre.textContent;
+    var done = function () { t.textContent = "Copied"; setTimeout(function () { t.textContent = "Copy"; }, 1400); };
+    var select = function () { var r = document.createRange(); r.selectNodeContents(pre); var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); t.textContent = "Selected"; setTimeout(function () { t.textContent = "Copy"; }, 1800); };
+    try { navigator.clipboard.writeText(text).then(done, select); } catch (err) { select(); }
+  });
+
+  /* ---------- step 1: divider ---------- */
+  function rsFromSlider(p) { return 1000 * Math.pow(300, p / 1000); }           // 1k .. 300k, log scale
+  function sliderFromRs(rs) { return Math.round(1000 * Math.log(rs / 1000) / Math.log(300)); }
+  function renderDivider() {
+    var rl = +$("rl").value, rs = rsFromSlider(+$("rs").value);
+    var rle = rl * 11500 / (rl + 11500), ao = 5000 * rle / (rs + rle), pin = ao * 68 / 115;
+    $("rsOut").textContent = fmt(rs / 1000, rs < 10000 ? 1 : 0) + " kΩ";
+    $("rlEff").textContent = fmt(rle / 1000, 2) + " kΩ";
+    $("aoOut").textContent = fmt(ao, 0) + " mV";
+    $("pinOut").textContent = fmt(pin, 0) + " mV";
+    var pct = Math.min(100, pin / 3100 * 100);
+    $("divBar").innerHTML = '<div class="track"></div><div class="zone" style="width:' + (100 - 2900 / 31) + '%"></div>' +
+      '<div class="mark" style="left:' + pct + '%"></div>' +
+      '<span class="tag up ' + (pct < 10 ? "l" : pct > 88 ? "r" : "") + '" style="left:' + pct + '%">pin ' + fmt(pin, 0) + ' mV</span>' +
+      '<span class="tag down l" style="left:0">0 mV</span><span class="tag down r" style="left:100%">ADC limit 3100</span>';
+    var note;
+    if (pin >= 2900) note = "Too close to the top of the ADC range: a response this strong would be clipped.";
+    else if (rs >= 45000) note = "Clean-air territory on this board. A larger load resistor lifts the signal: try 10 kΩ.";
+    else note = "Gas is present: Rs has dropped and the voltage has risen. The model works on this change relative to clean air, so the load resistor cancels out.";
+    $("divNote").textContent = note;
+  }
+  $("rs").value = sliderFromRs(45000);
+  $("rs").addEventListener("input", renderDivider); $("rl").addEventListener("change", renderDivider);
+
+  /* ---------- charts ---------- */
+  function svgEl(svg, html) { svg.innerHTML = html; }
+  function chart(o) {
+    var W = o.w, H = o.h, L = 46, R = 8, T = 10, B = 26;
+    var sx = function (x) { return L + (x - o.x0) / (o.x1 - o.x0) * (W - L - R); };
+    var sy = function (y) { return H - B - (y - o.y0) / (o.y1 - o.y0) * (H - T - B); };
+    var h = "";
+    (o.bands || []).forEach(function (b) { h += '<rect class="' + b.cls + '" x="' + sx(b.a) + '" y="' + T + '" width="' + Math.max(0, sx(b.b) - sx(b.a)) + '" height="' + (H - T - B) + '"/>'; });
+    o.yticks.forEach(function (t) { h += '<line class="grid" x1="' + L + '" x2="' + (W - R) + '" y1="' + sy(t) + '" y2="' + sy(t) + '"/><text x="' + (L - 6) + '" y="' + (sy(t) + 4) + '" text-anchor="end">' + t + "</text>"; });
+    o.xticks.forEach(function (t) { h += '<text x="' + sx(t) + '" y="' + (H - 8) + '" text-anchor="middle">' + t + (t === o.xticks[o.xticks.length - 1] ? " s" : "") + "</text>"; });
+    h += '<line class="axis" x1="' + L + '" x2="' + (W - R) + '" y1="' + sy(o.y0) + '" y2="' + sy(o.y0) + '"/>';
+    (o.vlines || []).forEach(function (x) { if (x >= o.x0 && x <= o.x1) h += '<line class="onset" x1="' + sx(x) + '" x2="' + sx(x) + '" y1="' + T + '" y2="' + (H - B) + '"/>'; });
+    var pts = o.pts.map(function (p) { return fmt(sx(p[0]), 1) + "," + fmt(sy(Math.max(o.y0, Math.min(o.y1, p[1]))), 1); }).join(" ");
+    h += '<polyline class="trace ' + o.cls + '" points="' + pts + '"/>';
+    h += '<text x="' + (L + 4) + '" y="' + (T + 10) + '">' + o.ylabel + "</text>";
+    return h;
+  }
+  function niceTicks(max) {
+    var step = max <= 120 ? 25 : max <= 250 ? 50 : max <= 600 ? 100 : 250, out = [];
+    for (var t = 0; t <= max; t += step) out.push(t);
+    return out;
+  }
+
+  /* ---------- step 5: window explorer ---------- */
+  var curEv = "alcohol";
+  function labelFor(ev, start) {
+    var o = ev.onset;
+    if (o === null || start + 100 <= o) return ["clean", "The whole window is before the stimulus: baseline only."];
+    if (start >= o + 150) return ["clean", "The window starts more than 15 s after the stimulus. It shows only the recovery, so it is labelled clean: no new event."];
+    var into = o - start;
+    if (into >= 10 && into <= 70) return [curEv, "The stimulus starts " + fmt(into / 10, 1) + " s into the window, leaving " + fmt((100 - into) / 10, 1) + " s of response. This window carries the recording's label."];
+    if (into > 70) return ["not used", "The stimulus starts only " + fmt((100 - into) / 10, 1) + " s before the window ends. Too little response is visible to tell the classes apart."];
+    return ["not used", "The window starts during or just after the response. The signal is still changing fast and no label would be honest."];
+  }
+  function renderWindow() {
+    var ev = EVENTS[curEv], v = ev.v, n = v.length, start = Math.min(+$("winStart").value, n - 100);
+    var vmax = Math.max.apply(null, v), top = Math.ceil(vmax * 1.08 / 25) * 25, dur = (n - 1) / 10;
+    var xt = []; for (var t = 0; t <= dur; t += 10) xt.push(t);
+    svgEl($("rawChart"), chart({ w: 520, h: 190, x0: 0, x1: dur, y0: 0, y1: top, cls: "s-" + curEv,
+      pts: v.map(function (y, i) { return [i / 10, y]; }), yticks: niceTicks(top), xticks: xt, ylabel: "sensor mV",
+      bands: [{ cls: "band", a: start / 10, b: (start + 99) / 10 }, { cls: "refband", a: start / 10, b: (start + 9) / 10 }],
+      vlines: ev.onset === null ? [] : [ev.onset / 10] }));
+    var ref = 0; for (var i = 0; i < 10; i++) ref += v[start + i]; ref /= 10;
+    var x = [], xm = -9;
+    for (i = 0; i < 100; i++) { var f = Math.max(-1, Math.min(4, Math.log(v[start + i] / ref))); x.push([i / 10, f]); if (f > xm) xm = f; }
+    svgEl($("featChart"), chart({ w: 520, h: 170, x0: 0, x1: 9.9, y0: -1, y1: 4, cls: "s-" + curEv, pts: x,
+      yticks: [-1, 0, 1, 2, 3, 4], xticks: [0, 2, 4, 6, 8], ylabel: "model input: ln(v / ref)",
+      bands: [{ cls: "refband", a: 0, b: 0.9 }],
+      vlines: ev.onset === null ? [] : [(ev.onset - start) / 10] }));
+    $("winOut").textContent = fmt(start / 10, 1) + " s to " + fmt((start + 100) / 10, 1) + " s";
+    $("refOut").textContent = fmt(ref, 1) + " mV";
+    $("maxOut").textContent = fmt(xm, 2) + "  (" + fmt(Math.exp(xm), 2) + "× ref)";
+    var lab = labelFor(ev, start);
+    $("labelOut").textContent = lab[0]; $("labelWhy").textContent = lab[1] + " Dashed line: stimulus onset. Dark band: the reference second.";
+  }
+  function pickEvent(name) {
+    curEv = name;
+    var ev = EVENTS[name], sl = $("winStart");
+    sl.max = ev.v.length - 100; sl.value = ev.onset === null ? 60 : ev.onset - 30;
+    Array.prototype.forEach.call($("evPick").children, function (b) { b.classList.toggle("on", b.dataset.ev === name); b.classList.toggle("quiet", b.dataset.ev !== name); });
+    renderWindow();
+  }
+  CLASSES.forEach(function (c) {
+    var b = document.createElement("button");
+    b.type = "button"; b.className = "btn quiet"; b.dataset.ev = c; b.textContent = EVENTS[c].file;
+    b.addEventListener("click", function () { pickEvent(c); });
+    $("evPick").appendChild(b);
+  });
+  $("winStart").addEventListener("input", renderWindow);
+
+  /* ---------- step 6: confusion matrix ---------- */
+  (function () {
+    var m = [[418, 29, 0, 3], [54, 186, 0, 0], [7, 0, 200, 33], [2, 0, 32, 206]];
+    var h = "<thead><tr><th>true ↓ · predicted →</th>";
+    CLASSES.forEach(function (c) { h += '<th class="n">' + c + "</th>"; });
+    h += '<th class="n">recall</th></tr></thead><tbody>';
+    m.forEach(function (row, i) {
+      var sum = row.reduce(function (a, b) { return a + b; }, 0);
+      h += '<tr><td><span class="lbl"><i class="dot ' + CLASSES[i] + '"></i>' + CLASSES[i] + "</span></td>";
+      row.forEach(function (v, j) {
+        var share = Math.round(v / sum * 100), tone = i === j ? "var(--ok)" : "var(--bad)";
+        h += '<td class="n cell" style="background:color-mix(in srgb, ' + tone + " " + Math.round(share * (i === j ? 0.3 : 0.9)) + '%, transparent)">' + v + "</td>";
+      });
+      h += '<td class="n">' + Math.round(row[i] / sum * 100) + "%</td></tr>";
+    });
+    $("cm").innerHTML = h + "</tbody>";
+  })();
+
+  /* ---------- step 7: quantisation ---------- */
+  var SCALE = 0.014355, ZERO = -108;
+  function renderQuant() {
+    var ratio = 0.5 * Math.pow(80, +$("ratio").value / 1000);                  // 0.5x .. 40x, log scale
+    var x = Math.max(-1, Math.min(4, Math.log(ratio)));
+    var q = Math.max(-128, Math.min(127, Math.round(x / SCALE) + ZERO));
+    var back = SCALE * (q - ZERO);
+    $("ratioOut").textContent = fmt(ratio, 2) + "×";
+    $("qx").textContent = fmt(x, 3); $("qq").textContent = q;
+    $("qback").textContent = fmt(back, 3); $("qerr").textContent = fmt(Math.abs(back - x), 3);
+    var pct = (q + 128) / 255 * 100;
+    $("qBar").innerHTML = '<div class="track"></div><div class="mark" style="left:' + pct + '%"></div>' +
+      '<span class="tag up ' + (pct < 8 ? "l" : pct > 92 ? "r" : "") + '" style="left:' + pct + '%">' + q + "</span>" +
+      '<span class="tag down l" style="left:0">−128 = −0.29</span><span class="tag down r" style="left:100%">127 = 3.37</span>';
+    var note;
+    if (q === 127) note = "Saturated at the top. The int8 range ends at 3.37, the largest value in the first session's data (29× baseline). Anything stronger looks the same to the model.";
+    else if (q === -128) note = "Saturated at the bottom. Values below −0.29 were rare in the data, so the converter did not spend levels on them.";
+    else note = "One int8 step is 0.014 in ln units, about a 1.4% change in voltage. A breath response of 1.2× is about 13 steps above zero.";
+    $("qNote").textContent = note;
+  }
+  $("ratio").addEventListener("input", renderQuant);
+
+  /* ---------- step 8: event logic, as in track_event() ---------- */
+  var sim, simTimer = null;
+  function simReset() { sim = { state: "IDLE", streak: 0, collected: 0, holdoff: 0, votes: [0, 0, 0, 0], t: 0, log: [] }; }
+  function simFeed(cls) {
+    var s = sim, note = "";
+    s.t++;
+    if (s.state === "IDLE") {
+      s.streak = cls !== 0 ? s.streak + 1 : 0;
+      if (s.streak >= 2) { s.votes = [0, 0, 0, 0]; s.collected = 0; s.state = "VOTING"; note = "two non-clean in a row: vote opens"; }
+      else if (cls !== 0) note = "streak 1 of 2";
+    } else if (s.state === "VOTING") {
+      s.votes[cls]++; s.collected++;
+      note = "vote " + s.collected + " of 5";
+      if (s.collected >= 5) {
+        var winner = 1, ev = 0;
+        for (var i = 1; i < 4; i++) { ev += s.votes[i]; if (s.votes[i] > s.votes[winner]) winner = i; }
+        s.streak = 0;
+        var tally = CLASSES.map(function (c, k) { return c + " " + s.votes[k]; }).join(", ");
+        if (ev >= 3) { s.holdoff = 20; s.state = "HOLDOFF"; note = "votes: " + tally; s.pending = winner; }
+        else { s.state = "IDLE"; note = "votes: " + tally + ". Fewer than 3 non-clean: no event"; }
+      }
+    } else {
+      s.holdoff--; note = "quiet for " + s.holdoff + " s more";
+      if (s.holdoff <= 0) { s.state = "IDLE"; note = "hold-off over"; }
+    }
+    s.log.push([("  " + s.t).slice(-3) + " s  " + (CLASSES[cls] + "       ").slice(0, 8) + note, ""]);
+    if (s.pending) { s.log.push([">>> EVENT: " + CLASSES[s.pending] + "   (" + s.pending + (s.pending === 1 ? " beep)" : " beeps)"), "ev"]); s.pending = 0; }
+    renderSim();
+  }
+  function renderSim() {
+    Array.prototype.forEach.call($("simState").children, function (el) { el.classList.toggle("on", el.dataset.s === sim.state); });
+    var log = $("simLog");
+    log.innerHTML = sim.log.length ? "" : "Feed a prediction, or play a sequence.";
+    sim.log.forEach(function (l) { var d = document.createElement("div"); d.textContent = l[0]; if (l[1]) d.className = l[1]; log.appendChild(d); });
+    log.scrollTop = log.scrollHeight;
+  }
+  var SEQ = { alcohol: [0, 0, 3, 2, 2, 2, 2, 3, 2, 0, 0, 3, 0, 0], blip: [0, 1, 1, 0, 0, 1, 0, 0, 0] };
+  function simPlay(name) {
+    clearInterval(simTimer); simReset(); renderSim();
+    var seq = SEQ[name], i = 0;
+    simTimer = setInterval(function () { simFeed(seq[i++]); if (i >= seq.length) clearInterval(simTimer); }, 450);
+  }
+  $("simFeed").addEventListener("click", function (e) { var b = e.target.closest("[data-feed]"); if (b) { clearInterval(simTimer); simFeed(+b.dataset.feed); } });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-play]"); if (!b) return;
+    if (b.dataset.play === "reset") { clearInterval(simTimer); simReset(); renderSim(); } else simPlay(b.dataset.play);
+  });
+
+  renderProgress(); renderDivider(); pickEvent("alcohol"); renderQuant(); simReset(); renderSim();
+})();
+</script>
+
+</body>
+</html>
